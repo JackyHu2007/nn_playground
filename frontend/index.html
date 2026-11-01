@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1024">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>Neural Network Playground</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="l--page header-inner">
+    <h1 class="l--page">Tinker with a <b>Neural Network</b> in your browser.</h1>
+    <div class="header-actions">
+      <a href="/tutorial.html" id="tutorial-link" class="tutorial-link" title="Open the tutorial">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 6px;">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+        Tutorial
+      </a>
+      <button id="save-config-btn" type="button" class="tutorial-link" title="Save current configuration as JSON">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 6px;">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        Save
+      </button>
+      <button id="import-config-btn" type="button" class="tutorial-link" title="Load a saved configuration from JSON">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 6px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Import
+      </button>
+      <input type="file" id="import-config-input" accept=".json,application/json" style="display: none">
+    </div>
+  </div>
+</header>
+
+<div id="top-controls">
+  <div class="container l--page">
+    <div class="timeline-controls">
+      <button id="reset-button" title="Reset">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+      </button>
+      <button id="play-pause-button" class="play" title="Play/Pause">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+      <button id="next-step-button" title="Step">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
+          <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="control">
+      <span class="label">EPOCH</span>
+      <span class="value" id="iter-number">0</span>
+    </div>
+
+    <div class="control ui-learningRate">
+      <label for="learningRate">Learning rate</label>
+      <div class="select">
+        <select id="learningRate">
+          <option value="0.00001">0.00001</option>
+          <option value="0.00003">0.00003</option>
+          <option value="0.0001">0.0001</option>
+          <option value="0.0003">0.0003</option>
+          <option value="0.001">0.001</option>
+          <option value="0.003">0.003</option>
+          <option value="0.005">0.005</option>
+          <option value="0.01">0.01</option>
+          <option value="0.02">0.02</option>
+          <option value="0.03">0.03</option>
+          <option value="0.05">0.05</option>
+          <option value="0.1">0.1</option>
+          <option value="0.2">0.2</option>
+          <option value="0.3">0.3</option>
+          <option value="0.5">0.5</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control ui-regularization">
+      <label for="regularizations">Regularization</label>
+      <div class="select">
+        <select id="regularizations">
+          <option value="none">None</option><option value="L1">L1</option><option value="L2">L2</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control ui-regularizationRate">
+      <label for="regularRate">Regularization rate</label>
+      <div class="select">
+        <select id="regularRate">
+          <option value="0">0</option><option value="0.001">0.001</option>
+          <option value="0.003">0.003</option><option value="0.01">0.01</option>
+          <option value="0.03">0.03</option><option value="0.1">0.1</option>
+          <option value="0.3">0.3</option><option value="1">1</option>
+          <option value="3">3</option><option value="10">10</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control ui-problem">
+      <label for="problem">Problem type</label>
+      <div class="select">
+        <select id="problem">
+          <option value="classification">Binary classification</option>
+          <option value="multiclass">Multiclass</option>
+          <option value="regression">Regression</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control ui-gradClip">
+      <label>Grad Clip</label>
+      <div class="select" style="display: flex; gap: 4px;">
+        <select id="gradClipMethod" style="min-width: 65px;">
+          <option value="none">None</option>
+          <option value="value">Value</option>
+          <option value="norm">Norm</option>
+        </select>
+        <select id="gradClipValue" style="min-width: 50px; display: none;">
+          <option value="0.1">0.1</option>
+          <option value="0.5">0.5</option>
+          <option value="1">1.0</option>
+          <option value="2">2.0</option>
+          <option value="5">5.0</option>
+          <option value="10">10.0</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control ui-optimizer">
+      <label for="optimizer">Optimizer</label>
+      <div class="select">
+        <select id="optimizer">
+          <option value="SGD">SGD</option><option value="Momentum">Momentum</option>
+          <option value="RMSProp">RMSProp</option><option value="Adam">Adam</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="toggle-config-btn" class="toggle-drawer-btn" style="left: 0; right: auto; border-radius: 0 6px 6px 0; box-shadow: 2px 2px 6px rgba(0,0,0,0.2);">NETWORK CONFIG</button>
+
+<aside id="data-drawer" class="drawer data-drawer">
+  <div class="drawer-header">
+    <h4>DATA & SETTINGS</h4>
+    <button id="close-data-btn" class="icon-btn" style="width:26px; height:26px; border-radius:50%; border:none; background:#eef1f5; cursor:pointer; font-size:16px;">×</button>
+  </div>
+  <div class="drawer-body">
+    <p>Upload your own JSON:</p>
+    <div class="upload-area">
+      <input type="file" id="files" accept=".json" style="display:none">
+      <label class="upload-btn" for="files"><span style="font-size:24px;color:#fff;">⬆</span></label>
+      <div class="upload-preview" id="custom-preview-box"></div>
+    </div>
+    <p>Or use synthetic data:</p>
+    <div class="dataset-list" id="synthetic-datasets"></div>
+    <p>Or try real-world data:</p>
+    <div class="dataset-list" id="real-datasets"></div>
+
+    <div class="ui-numSamples" style="margin-top:20px;">
+      <label for="numSamples">Data points:&nbsp;<span class="value">400</span></label>
+      <input type="range" id="numSamples" min="50" max="2000" step="50">
+    </div>
+    <div class="ui-percTrainData">
+      <label for="percTrainData">Train:test ratio:&nbsp;<span class="value">50</span>%</label>
+      <input type="range" id="percTrainData" min="10" max="90" step="10">
+    </div>
+    <div class="ui-noise">
+      <label for="noise">Noise:&nbsp;<span class="value">0</span></label>
+      <input type="range" id="noise" min="0" max="50" step="5">
+    </div>
+    <div class="ui-batchSize">
+      <label for="batchSize">Batch size:&nbsp;<span class="value">10</span></label>
+      <input type="range" id="batchSize" min="1" max="128" step="1">
+    </div>
+    <label class="checkbox ui-onlineData" style="margin-top:16px;">
+      <input type="checkbox" id="onlineData">
+      <span>Online data<br><small style="color:#888;">(new train set each epoch)</small></span>
+    </label>
+
+    <button class="basic-button" id="data-regen-button">REGENERATE</button>
+  </div>
+</aside>
+
+<button id="toggle-data-btn" class="toggle-drawer-btn" style="right: 0; left: auto; border-radius: 6px 0 0 6px; box-shadow: -2px 2px 6px rgba(0,0,0,0.2);">DATA & SETTINGS</button>
+
+<aside id="config-drawer" class="drawer config-drawer">
+  <div class="drawer-header">
+    <h4>NETWORK CONFIG</h4>
+    <button id="close-config-btn" class="icon-btn" style="width:26px; height:26px; border-radius:50%; border:none; background:#eef1f5; cursor:pointer; font-size:16px;">×</button>
+  </div>
+  <div class="drawer-body">
+    <div class="control ui-activation" style="margin-bottom: 16px;">
+      <label for="activations">Default activation (new layers)</label>
+      <div class="select">
+        <select id="activations">
+          <option value="linear">Linear</option>
+          <option value="sigmoid">Sigmoid</option>
+          <option value="tanh">Tanh</option>
+          <option value="relu">ReLU</option>
+          <option value="leakyrelu">Leaky ReLU</option>
+          <option value="elu">ELU</option>
+          <option value="selu">SELU</option>
+          <option value="swish">Swish</option>
+          <option value="gelu">GELU</option>
+          <option value="softplus">Softplus</option>
+          <option value="mish">Mish</option>
+          <option value="sine">Sine</option>
+          <option value="arctan">ArcTan</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="per-layer-wrap" style="margin-bottom: 20px;">
+      <h5 style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; margin:0 0 8px;">Layers</h5>
+      <div id="per-layer-config"></div>
+      <div class="layer-add-controls">
+        <button id="add-layer-btn" class="add-btn">+ Hidden Layer</button>
+        <button id="add-moe-btn" class="add-btn">+ MoE Block</button>
+      </div>
+    </div>
+
+    <div>
+      <label class="checkbox ui-useResidual" style="margin-top:16px;">
+        <input type="checkbox" id="useResidual">
+        <span>Residual connections</span>
+      </label>
+      <div id="residual-controls" style="display:none; margin-bottom:12px">
+        <button id="show-res-panel" class="basic-button" style="margin-top:8px; padding:6px;">+ Add Skip Connection</button>
+        <div id="residual-list" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div id="residual-panel" style="display: none; background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 4px; margin-top: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 13px;">
+      From <select id="res-src" style="margin: 0 4px;"></select>
+      to <select id="res-dst" style="margin: 0 4px;"></select>
+      <div style="margin-top:8px;">
+        <button id="btn-add-res" style="background: #00d05e; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer;">Add</button>
+        <button id="btn-cancel-res" style="background: #eee; color: #555; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; margin-left: 4px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div id="main-part" class="l--page">
+  <div class="column features">
+    <div class="network-header-row">
+      <div class="features-title">
+        <h4>FEATURES</h4>
+        <p>Which properties do you want to feed in?</p>
+      </div>
+    </div>
+
+    <div id="network">
+      <svg id="svg" width="100%" height="100%">
+        <defs>
+          <marker id="markerArrow" markerWidth="7" markerHeight="13" refX="1" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+            <path d="M2,11 L7,6 L2,2" fill="#333"/>
+          </marker>
+        </defs>
+      </svg>
+      <div id="node-zoom-layer" class="node-zoom-layer"></div>
+    </div>
+
+    <div id="expert-maps-container" class="expert-maps-container"></div>
+  </div>
+
+  <div class="column output">
+    <h4>OUTPUT</h4>
+    <div class="metrics">
+      <div class="output-stats"><span>Test loss</span><div class="value" id="loss-test">–</div></div>
+      <div class="output-stats train"><span>Training loss</span><div class="value" id="loss-train">–</div></div>
+      <div id="linechart"></div>
+    </div>
+
+    <div id="heatmap-container"><div id="heatmap"></div></div>
+
+    <div class="colormap">
+      <div class="cm-label">Colors shows data,<br>neuron and weight<br>values.</div>
+      <div class="cm-bar-wrapper">
+        <svg width="150" height="12" viewBox="0 0 150 12">
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#325396"/><stop offset="50%" stop-color="#e8eaeb"/><stop offset="100%" stop-color="#16afca"/>
+            </linearGradient>
+          </defs>
+          <rect width="144" height="8" y="2" fill="url(#gradient)"/>
+        </svg>
+        <div class="cm-ticks"><span>-1</span><span>0</span><span>1</span></div>
+      </div>
+    </div>
+    <div id="class-legend" class="class-legend" style="display:none; margin-top:16px;"></div>
+
+    <div class="checkboxes">
+      <label class="checkbox ui-showTestData"><input type="checkbox" id="show-test-data"><span>Show test data</span></label>
+      <label class="checkbox ui-discretize"><input type="checkbox" id="discretize"><span>Discretize output</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="l--page">
+  <div class="card">
+    <h2>This neural network as a Python function</h2>
+    <button id="copy-py-btn" class="copy-code-btn" title="Copy to clipboard" aria-label="Copy to clipboard">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
+    <pre><code id="network-as-python" class="language-python"></code></pre>
+  </div>
+</div>
+
+<footer><div class="l--page">Based on the earth science fork [Rocky Playground] · <span id="conn-status">connecting…</span></div></footer>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

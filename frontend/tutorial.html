@@ -1,0 +1,2104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1280">
+  <title>Tutorial · MLP Playground</title>
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    /* ---------------- tutorial-specific layout ---------------- */
+    body { background: #f7f8fa; }
+
+    .header-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 28px; padding-bottom: 28px;
+    }
+    .back-link {
+      color: #cfe0ff; text-decoration: none; font-size: 13px;
+      letter-spacing: 0.5px; border-bottom: 1px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .back-link:hover { color: #fff; border-bottom-color: #fff; }
+
+    /* tabs */
+    .tabs {
+      background: #fff; border-bottom: 1px solid #eaedf1;
+      position: sticky; top: 0; z-index: 90;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .tabs-inner { display: flex; gap: 8px; padding: 0; }
+    .tab-btn {
+      background: transparent; border: none; cursor: pointer;
+      padding: 16px 24px; font-size: 13px; font-weight: 500;
+      color: #8892a0; letter-spacing: 0.6px; text-transform: uppercase;
+      border-bottom: 2px solid transparent; transition: all .15s;
+    }
+    .tab-btn:hover { color: #325396; }
+    .tab-btn.active {
+      color: #325396; border-bottom-color: #325396;
+    }
+
+    /* main layout */
+    .tutorial-main {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 48px;
+      padding-top: 40px; padding-bottom: 80px;
+    }
+    .toc {
+      position: sticky; top: 88px; align-self: start;
+      max-height: calc(100vh - 108px); overflow-y: auto;
+      font-size: 12px; line-height: 1.65;
+    }
+    .toc h5 {
+      text-transform: uppercase; letter-spacing: 1px;
+      font-size: 10px; color: #8892a0; margin: 0 0 12px;
+      font-weight: 600;
+    }
+    .toc ol { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin-bottom: 6px; }
+    .toc a {
+      color: #555; text-decoration: none;
+      display: block; padding: 2px 8px; border-left: 2px solid #e2e6ea;
+      transition: all .12s;
+    }
+    .toc a:hover { color: #325396; border-left-color: #325396; background: #f0f4fb; }
+    .toc .sub { padding-left: 20px; font-size: 11.5px; color: #777; }
+    .toc .sub a { padding: 1px 8px; }
+
+    .content {
+      max-width: 820px; font-size: 15px; line-height: 1.75;
+      color: #222;
+    }
+    .content h2 {
+      font-size: 22px; font-weight: 500; color: #325396;
+      margin: 48px 0 16px; padding-bottom: 8px;
+      border-bottom: 1px solid #e2e6ea; letter-spacing: 0.3px;
+    }
+    .content h2:first-child { margin-top: 0; }
+    .content h3 {
+      font-size: 16px; font-weight: 600; color: #333;
+      margin: 32px 0 12px; letter-spacing: 0.2px;
+    }
+    .content h4 {
+      font-size: 13.5px; font-weight: 600; color: #444;
+      margin: 24px 0 8px; text-transform: none; letter-spacing: 0.2px;
+    }
+    .content p { margin: 0 0 14px; }
+    .content ul, .content ol { margin: 0 0 16px; padding-left: 24px; }
+    .content li { margin-bottom: 6px; }
+    .content code {
+      background: #f0f3f8; padding: 1px 6px; border-radius: 3px;
+      font-size: 13px; color: #325396;
+    }
+    .content pre {
+      background: #f7f9fc; border: 1px solid #e2e8f2;
+      border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+      font-size: 12.5px; line-height: 1.6;
+    }
+    .content blockquote {
+      border-left: 3px solid #325396; padding: 4px 16px;
+      margin: 16px 0; color: #555; background: #f7f9fc;
+      font-style: italic;
+    }
+
+    /* callout boxes */
+    .note, .warn, .tip {
+      border-left: 3px solid; padding: 10px 16px; margin: 16px 0;
+      border-radius: 4px; font-size: 14px; line-height: 1.65;
+    }
+    .note  { border-color: #325396; background: #f0f4fb; }
+    .warn  { border-color: #e08a00; background: #fef8ec; }
+    .tip   { border-color: #00a854; background: #effaf4; }
+    .note p:last-child, .warn p:last-child, .tip p:last-child { margin-bottom: 0; }
+
+    /* tables */
+    .content table {
+      border-collapse: collapse; width: 100%; margin: 16px 0;
+      font-size: 13.5px; line-height: 1.55;
+    }
+    .content th, .content td {
+      border: 1px solid #e2e6ea; padding: 8px 12px;
+      text-align: left; vertical-align: top;
+    }
+    .content th {
+      background: #f0f4fb; color: #325396;
+      font-weight: 600; white-space: nowrap;
+    }
+    .content tr:nth-child(even) td { background: #fafbfd; }
+
+    /* tab panel visibility */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: grid; }
+
+    /* hide one panel while auto-render runs — prevents FOUC of raw $..$ */
+    .math-pending { visibility: hidden; }
+    body.math-ready .math-pending { visibility: visible; }
+
+    @media (max-width: 1000px) {
+      .tutorial-main { grid-template-columns: 1fr; gap: 24px; }
+      .toc { position: static; max-height: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="l--page header-inner">
+    <h1>Tinker with a <b>Neural Network</b> · <span style="font-weight:300;opacity:.75">Tutorial</span></h1>
+    <a href="/" class="back-link" id="back-link">← Back to Playground</a>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="l--page tabs-inner">
+    <button class="tab-btn active" data-tab="theory">Theory&nbsp;·&nbsp;Math</button>
+    <button class="tab-btn" data-tab="usage">Using the Playground</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     TAB 1 · THEORY (MATH)
+     ════════════════════════════════════════════════════════════════════ -->
+<article id="tab-theory" class="tab-panel active l--page tutorial-main math-pending">
+
+  <nav class="toc">
+    <h5>Contents</h5>
+    <ol>
+      <li><a href="#t-notation">1 · Notation</a></li>
+      <li><a href="#t-fnn">2 · Feedforward Networks</a></li>
+      <li><a href="#t-uat">3 · Universal Approximation</a></li>
+      <li>
+        <a href="#t-act">4 · Activation Functions</a>
+        <div class="sub">
+          <a href="#t-act-table">4.1 Summary table</a>
+          <a href="#t-act-details">4.2 Each function</a>
+        </div>
+      </li>
+      <li><a href="#t-loss">5 · Loss Functions</a></li>
+      <li><a href="#t-backprop">6 · Backpropagation</a></li>
+      <li><a href="#t-opt">7 · Optimizers</a></li>
+      <li><a href="#t-reg">8 · Regularization</a></li>
+      <li><a href="#t-norm">9 · Normalization</a></li>
+      <li><a href="#t-res">10 · Residual Connections</a></li>
+      <li><a href="#t-moe">11 · Mixture of Experts</a></li>
+      <li><a href="#t-gen">12 · Generalization</a></li>
+    </ol>
+  </nav>
+
+  <div class="content">
+
+    <!-- ───────────────────────────── 1 · NOTATION -->
+    <h2 id="t-notation">1 · Notation</h2>
+    <p>
+      All quantities are real-valued. Scalars are lowercase italics
+      ($x, \alpha, \eta$), vectors are bold lowercase
+      ($\mathbf{h}, \mathbf{z} \in \mathbb{R}^{d}$), matrices are bold
+      uppercase ($W \in \mathbb{R}^{m \times n}$), and sets are calligraphic
+      ($\mathcal{D}, \mathcal{L}$).
+    </p>
+
+    <table>
+      <tr><th>Symbol</th><th>Meaning</th></tr>
+      <tr><td>$\mathcal{D} = \{(\mathbf{x}_i, y_i)\}_{i=1}^N$</td><td>training set, $N$ examples</td></tr>
+      <tr><td>$d_{\text{in}}, d_{\text{out}}$</td><td>input / output dimensions</td></tr>
+      <tr><td>$L$</td><td>number of layers</td></tr>
+      <tr><td>$d_l$</td><td>width of layer $l$; $d_0 = d_{\text{in}}$</td></tr>
+      <tr><td>$W^{(l)} \in \mathbb{R}^{d_l \times d_{l-1}}$, $\mathbf{b}^{(l)} \in \mathbb{R}^{d_l}$</td><td>weights and biases of layer $l$</td></tr>
+      <tr><td>$\mathbf{z}^{(l)} \in \mathbb{R}^{d_l}$</td><td>pre-activation of layer $l$</td></tr>
+      <tr><td>$\mathbf{h}^{(l)} \in \mathbb{R}^{d_l}$</td><td>post-activation (hidden state) of layer $l$; $\mathbf{h}^{(0)} = \mathbf{x}$</td></tr>
+      <tr><td>$\sigma(\cdot)$</td><td>elementwise activation function</td></tr>
+      <tr><td>$\theta$</td><td>all learnable parameters (weights + biases + normalization gains)</td></tr>
+      <tr><td>$\mathcal{L}(\theta)$</td><td>loss (scalar)</td></tr>
+      <tr><td>$\eta$</td><td>learning rate</td></tr>
+      <tr><td>$\odot$</td><td>elementwise (Hadamard) product</td></tr>
+      <tr><td>$\odot'$</td><td>elementwise derivative</td></tr>
+      <tr><td>$\mathbb{1}[\cdot]$</td><td>indicator (1 if true, else 0)</td></tr>
+      <tr><td>$X \in \mathbb{R}^{B \times d}$</td><td>a batch of $B$ inputs, one per row</td></tr>
+    </table>
+
+    <blockquote>
+      Convention: a "layer" is an affine map <em>followed by</em> an
+      elementwise nonlinearity. The output layer is the last such map and may
+      be followed by softmax (classification) or identity (regression).
+    </blockquote>
+
+
+    <!-- ───────────────────────────── 2 · FEEDFORWARD -->
+    <h2 id="t-fnn">2 · Feedforward Networks</h2>
+
+    <h3>2.1 Definition</h3>
+    <p>
+      A feedforward neural network with $L$ layers is a function
+      $f_\theta : \mathbb{R}^{d_{\text{in}}} \to \mathbb{R}^{d_{\text{out}}}$
+      defined by the recurrence
+    </p>
+    $$
+    \mathbf{z}^{(l)} = W^{(l)} \mathbf{h}^{(l-1)} + \mathbf{b}^{(l)},
+    \qquad
+    \mathbf{h}^{(l)} = \sigma^{(l)}\!\left(\mathbf{z}^{(l)}\right),
+    \qquad l = 1, \dots, L,
+    $$
+    <p>
+      with $\mathbf{h}^{(0)} = \mathbf{x}$ and $f_\theta(\mathbf{x}) = \mathbf{h}^{(L)}$.
+      Each layer has its own weight matrix and may use a different
+      activation $\sigma^{(l)}$.
+    </p>
+
+    <h3>2.2 Batch form</h3>
+    <p>
+      Given a batch $H^{(l-1)} \in \mathbb{R}^{B \times d_{l-1}}$ whose rows
+      are $(\mathbf{h}_i^{(l-1)})^\top$, the same recurrence becomes
+    </p>
+    $$
+    Z^{(l)} = H^{(l-1)} \left(W^{(l)}\right)^\top + \mathbf{1}_B\,(\mathbf{b}^{(l)})^\top,
+    \qquad
+    H^{(l)} = \sigma^{(l)}(Z^{(l)}),
+    $$
+    <p>
+      where $\mathbf{1}_B$ is the all-ones vector of length $B$. This is the
+      form used for training, since gradient updates are naturally averaged
+      over a mini-batch.
+    </p>
+
+    <h3>2.3 Parameter count</h3>
+    <p>
+      A dense layer with $d_{l-1}$ inputs and $d_l$ outputs has
+      $d_{l-1} d_l$ weights plus $d_l$ biases, for a total of
+    </p>
+    $$
+    P_{\text{dense}} = \sum_{l=1}^{L} \left( d_{l-1} d_l + d_l \right).
+    $$
+    <p>
+      Complexity: a forward pass costs $O\!\left(\sum_l d_{l-1} d_l\right)$
+      multiply-adds. The backward pass is roughly $2\times$ the forward cost
+      because it must compute both $\partial \mathcal{L} / \partial W^{(l)}$
+      and $\partial \mathcal{L} / \partial \mathbf{h}^{(l-1)}$ for every layer.
+    </p>
+
+
+    <!-- ───────────────────────────── 3 · UAT -->
+    <h2 id="t-uat">3 · Universal Approximation</h2>
+    <p>
+      Let $\sigma$ be a non-polynomial, continuous, bounded function
+      (e.g.&nbsp;sigmoid). Then the set of single-hidden-layer networks
+      $\{ \mathbf{x} \mapsto \sum_{j=1}^{m} \alpha_j \sigma(\mathbf{w}_j^\top \mathbf{x} + b_j) \}$
+      is <em>dense</em> in the space of continuous functions on any compact
+      subset of $\mathbb{R}^{d_{\text{in}}}$, in the sup norm.
+      This is the classical <b>Universal Approximation Theorem</b>
+      (Cybenko 1989, Hornik 1989, Barron 1993).
+    </p>
+    <p>
+      Two caveats matter in practice:
+    </p>
+    <ul>
+      <li>
+        <b>Existence ≠ efficiency.</b> The theorem gives no bound on the width
+        $m$ required to achieve a given error. Approximation may need
+        exponentially many neurons in the worst case.
+      </li>
+      <li>
+        <b>Depth beats width.</b> For certain function classes, a depth-$L$
+        network can represent functions that need exponentially more neurons
+        in a shallower network (Telgarsky 2016; Eldan–Shamir 2016). Depth
+        composes features hierarchically — this is why the playground lets you
+        stack layers rather than just widening a single layer.
+      </li>
+    </ul>
+
+
+    <!-- ───────────────────────────── 4 · ACTIVATIONS -->
+    <h2 id="t-act">4 · Activation Functions</h2>
+    <p>
+      The activation $\sigma$ is the only <em>nonlinear</em> ingredient of the
+      network. Without it, any stack of affine maps composes to a single
+      affine map:
+    </p>
+    $$
+    W^{(2)}\!\left(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}\right) + \mathbf{b}^{(2)}
+    = (W^{(2)} W^{(1)})\,\mathbf{x} + (W^{(2)}\mathbf{b}^{(1)} + \mathbf{b}^{(2)}).
+    $$
+    <p>
+      So $\sigma$ is what gives the network its expressive power. Each
+      choice trades off smoothness, saturation, gradient magnitude,
+      computational cost, and statistical bias.
+    </p>
+
+    <h3 id="t-act-table">4.1 Summary</h3>
+    <table>
+      <tr>
+        <th>Function</th>
+        <th>Smooth</th>
+        <th>Monotone</th>
+        <th>Saturating</th>
+        <th>Zero-centered output</th>
+        <th>Notes</th>
+      </tr>
+      <tr><td>Linear</td>     <td>✓</td><td>✓</td><td>—</td><td>✓</td><td>Collapses to affine</td></tr>
+      <tr><td>Sigmoid</td>    <td>✓</td><td>✓</td><td>✓</td><td>✗</td><td>Gradient ≤ 0.25</td></tr>
+      <tr><td>Tanh</td>       <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>Gradient ≤ 1</td></tr>
+      <tr><td>ReLU</td>       <td>✗</td><td>✓</td><td>✗</td><td>✗</td><td>Half the units dead</td></tr>
+      <tr><td>Leaky ReLU</td> <td>✗</td><td>✓</td><td>✗</td><td>✗</td><td>Small leak α</td></tr>
+      <tr><td>ELU</td>        <td>✗</td><td>✓</td><td>✓</td><td>~</td><td>Mean shifts to 0</td></tr>
+      <tr><td>SELU</td>       <td>✗</td><td>✓</td><td>✓</td><td>~</td><td>Self-normalizing</td></tr>
+      <tr><td>Swish (SiLU)</td><td>✓</td><td>✗</td><td>~</td><td>✗</td><td>Self-gated</td></tr>
+      <tr><td>GELU</td>       <td>✓</td><td>✗</td><td>~</td><td>✗</td><td>≈ Swish</td></tr>
+      <tr><td>Softplus</td>   <td>✓</td><td>✓</td><td>✗</td><td>✗</td><td>Smooth ReLU</td></tr>
+      <tr><td>Mish</td>       <td>✓</td><td>✗</td><td>~</td><td>✗</td><td>$x\tanh(\text{softplus}(x))$</td></tr>
+      <tr><td>Sine</td>       <td>✓</td><td>✗</td><td>✗</td><td>✓</td><td>Implicit high frequency</td></tr>
+      <tr><td>Arctan</td>     <td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>Saturates at ±π/2</td></tr>
+    </table>
+
+    <h3 id="t-act-details">4.2 Each function</h3>
+
+    <h4>Sigmoid</h4>
+    $$
+    \sigma(x) = \frac{1}{1 + e^{-x}}, \qquad
+    \sigma'(x) = \sigma(x)\,\bigl(1 - \sigma(x)\bigr).
+    $$
+    <p>
+      The derivative satisfies $\sigma'(x) \le \tfrac14$. When stacked, the
+      product $\prod_l \sigma'(z_l)$ shrinks like $(1/4)^L$, so gradients
+      vanish exponentially with depth — this is why sigmoid fell out of
+      favor for deep networks. Output is not zero-centered, which biases the
+      gradient of the next layer's weights.
+    </p>
+
+    <h4>Tanh</h4>
+    $$
+    \tanh(x) = \frac{e^{x} - e^{-x}}{e^{x} + e^{-x}}, \qquad
+    \tanh'(x) = 1 - \tanh^2(x) \le 1.
+    $$
+    <p>
+      Zero-centered version of sigmoid: $\tanh(x) = 2\sigma(2x) - 1$. The
+      gradient still saturates at large $|x|$, but the bound is $1$ rather
+      than $\tfrac14$, so vanishing is milder. Still vanishes for deep
+      stacks unless paired with normalization or residual connections.
+    </p>
+
+    <h4>ReLU</h4>
+    $$
+    \mathrm{ReLU}(x) = \max(0, x), \qquad
+    \mathrm{ReLU}'(x) = \mathbb{1}[x > 0].
+    $$
+    <p>
+      Cheap, sparse (≈ half the units inactive per example), and does not
+      saturate for $x > 0$. However it is non-differentiable at $0$ (the
+      subgradient used is typically $0$ or $1$), and units with
+      $z_l < 0$ for <em>all</em> inputs receive zero gradient forever —
+      the famous <b>dying ReLU</b>. Large learning rates make this worse.
+    </p>
+
+    <h4>Leaky ReLU</h4>
+    $$
+    \mathrm{LReLU}(x) = \max(0, x) + \alpha \min(0, x),
+    \qquad
+    \mathrm{LReLU}'(x) = \mathbb{1}[x > 0] + \alpha\,\mathbb{1}[x \le 0],
+    $$
+    <p>with $\alpha$ a small positive constant (this project uses $\alpha = 0.1$).</p>
+    <p>
+      The nonzero slope for $x < 0$ keeps gradients alive and prevents dead
+      units. Not smooth at $0$ (a kink remains).
+    </p>
+
+    <h4>ELU</h4>
+    $$
+    \mathrm{ELU}(x) = \begin{cases} x & x > 0 \\ \alpha (e^{x} - 1) & x \le 0 \end{cases},
+    \qquad
+    \mathrm{ELU}'(x) = \begin{cases} 1 & x > 0 \\ \alpha e^{x} & x \le 0 \end{cases}
+    $$
+    <p>
+      (here $\alpha = 0.1$). Smooth almost everywhere, approaches $-\alpha$
+      as $x \to -\infty$, and has mean closer to $0$ than ReLU. Costs an
+      exponential on the negative branch.
+    </p>
+
+    <h4>SELU</h4>
+    $$
+    \mathrm{SELU}(x) = s \cdot \begin{cases} x & x > 0 \\ \alpha (e^{x} - 1) & x \le 0 \end{cases},
+    \quad s \approx 1.0507,\ \alpha \approx 1.6733.
+    $$
+    <p>
+      The specific constants ($s$, $\alpha$) are chosen so that, assuming
+      unit-variance inputs and standard initialization, the activations at
+      every layer are approximately normalized (mean 0, variance 1). This is
+      the <b>self-normalizing</b> property (Klambauer et al. 2017).
+    </p>
+
+    <h4>Swish / SiLU</h4>
+    $$
+    \mathrm{Swish}(x) = x \cdot \sigma(x), \qquad
+    \mathrm{Swish}'(x) = \sigma(x) + x\,\sigma(x)\bigl(1 - \sigma(x)\bigr).
+    $$
+    <p>
+      Self-gated: the network learns a soft gate $\sigma(x)$ over its own
+      input. Non-monotone (has a shallow minimum around $x \approx -1.28$),
+      unbounded below, smooth. Empirically close to ReLU on large models but
+      slightly better on some benchmarks (Ramachandran et al. 2017).
+    </p>
+
+    <h4>GELU</h4>
+    $$
+    \mathrm{GELU}(x) = x \cdot \Phi(x),
+    $$
+    <p>
+      where $\Phi$ is the standard normal CDF. Equivalently,
+      $\mathrm{GELU}(x) = x \cdot \mathbb{E}_{u \sim \mathcal{N}(0,1)}[\mathbb{1}[u \le x]]$.
+      The tanh approximation used here is
+    </p>
+    $$
+    \mathrm{GELU}(x) \approx \tfrac12 x \left(1 + \tanh\!\left(\sqrt{\tfrac{2}{\pi}}\,\bigl(x + 0.044715\,x^3\bigr)\right)\right).
+    $$
+    <p>
+      Smooth, non-monotone, unbounded below. Beats ReLU on many NLP/vision
+      benchmarks (Hendrycks &amp; Gimpel 2016); currently the default in
+      transformers.
+    </p>
+
+    <h4>Softplus</h4>
+    $$
+    \mathrm{Softplus}(x) = \log\!\left(1 + e^{x}\right), \qquad
+    \mathrm{Softplus}'(x) = \sigma(x).
+    $$
+    <p>
+      A smooth ReLU: everywhere differentiable, never exactly zero gradient,
+      no dead units. Never fully sparse though — every unit contributes a
+      little.
+    </p>
+
+    <h4>Mish</h4>
+    $$
+    \mathrm{Mish}(x) = x \cdot \tanh\!\bigl(\mathrm{Softplus}(x)\bigr).
+    $$
+    <p>
+      Combines Swish's self-gating with Softplus's smoothness. Slightly more
+      expensive than ReLU or Swish, sometimes better calibrated.
+    </p>
+
+    <h4>Sine</h4>
+    $$
+    \sin(x), \qquad \frac{d}{dx}\sin(x) = \cos(x).
+    $$
+    <p>
+      Periodic, so it excels at learning high-frequency functions from
+      low-frequency data (SIREN, Sitzmann et al. 2020). But the network must
+      first <em>align</em> the frequency, which is non-trivial — the
+      gradient landscape is very non-convex early on.
+    </p>
+
+    <h4>Arctan</h4>
+    $$
+    \arctan(x) \in \left(-\tfrac{\pi}{2}, \tfrac{\pi}{2}\right), \qquad
+    \arctan'(x) = \frac{1}{1 + x^2}.
+    $$
+    <p>
+      Bounded, symmetric, zero-centered, but saturates quadratically (much
+      faster than tanh's exponential tail). Rarely used in modern deep nets
+      but interesting for low-dimensional toy problems.
+    </p>
+
+    <h4>Linear</h4>
+    <p>
+      $\sigma(x) = x$. A layer with linear activation is a pure affine map;
+      stacking two such layers is equivalent to one. Used only at the output
+      of regression networks.
+    </p>
+
+
+    <!-- ───────────────────────────── 5 · LOSS -->
+    <h2 id="t-loss">5 · Loss Functions</h2>
+    <p>
+      The loss measures discrepancy between the network's output and the
+      target. The choice is not cosmetic — it implicitly defines what
+      "good fit" means, and determines how gradients behave near saturation.
+    </p>
+
+    <h3>5.1 Squared error (regression &amp; binary)</h3>
+    $$
+    \mathcal{L}_{\text{SQ}}(\theta) = \frac{1}{2N} \sum_{i=1}^{N} \bigl(f_\theta(\mathbf{x}_i) - y_i\bigr)^2.
+    $$
+    <p>
+      Gradient: $\nabla_{f} \mathcal{L}_{\text{SQ}} = \frac{1}{N}(f_\theta(\mathbf{x}_i) - y_i)$.
+      Penalises large errors quadratically; sensitive to outliers. For binary
+      classification the playground uses this on targets $y_i \in \{-1, +1\}$
+      with a tanh output in $(-1, 1)$ — i.e.&nbsp;the output activation's
+      range <em>is</em> the label range.
+    </p>
+
+    <h3>5.2 Softmax cross-entropy (multiclass)</h3>
+    $$
+    \hat{p}_k(\mathbf{z}) = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}},
+    \qquad
+    \mathcal{L}_{\text{CE}}(\theta) = -\frac{1}{N}\sum_{i=1}^N \sum_{k=1}^K y_{i,k} \log \hat{p}_k(f_\theta(\mathbf{x}_i)),
+    $$
+    <p>
+      where $\mathbf{y}_i$ is the one-hot encoding of the target class. Two
+      important facts:
+    </p>
+    <ul>
+      <li>
+        <b>The gradient simplifies.</b> Using $\partial \hat{p}_k / \partial z_j = \hat{p}_k(\delta_{kj} - \hat{p}_j)$,
+        the gradient w.r.t. logits is exactly
+        $$
+        \frac{\partial \mathcal{L}_{\text{CE}}}{\partial z_k} = \hat{p}_k - y_k.
+        $$
+        This "prediction minus one-hot" form is numerically stable and
+        gradient-friendly: bounded, never saturates even if $\hat{p}_k \to 1$.
+      </li>
+      <li>
+        <b>Combined with softmax, it's equivalent to fitting a
+        Boltzmann distribution.</b> Minimising CE w.r.t. logits is the
+        maximum-likelihood estimator for a categorical model
+        $\hat{p}(y \mid \mathbf{x}) = \mathrm{softmax}(f_\theta(\mathbf{x}))$.
+      </li>
+    </ul>
+
+    <div class="note">
+      <p><b>Note on the playground.</b> The training loop computes the fused
+      softmax+CE gradient directly (see <code>Network.backward</code> in
+      <code>nn.py</code>) and never calls the <code>CROSS_ENTROPY.der</code>
+      stub. The stub exists only so the interface is uniform.</p>
+    </div>
+
+
+    <!-- ───────────────────────────── 6 · BACKPROP -->
+    <h2 id="t-backprop">6 · Backpropagation</h2>
+    <p>
+      Backprop is <em>reverse-mode automatic differentiation</em> specialised
+      to a feedforward network. It is not a separate algorithm: it is just
+      the chain rule applied in the reverse topological order of the
+      computation graph.
+    </p>
+
+    <h3>6.1 The chain rule</h3>
+    <p>
+      Define the <b>error signal</b> at layer $l$:
+    </p>
+    $$
+    \boldsymbol{\delta}^{(l)} := \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(l)}} \in \mathbb{R}^{d_l}.
+    $$
+    <p>
+      At the output layer, this is the loss derivative w.r.t. the logits
+      (for multiclass, this is exactly $\hat{p} - \mathbf{y}$).
+      Going backwards through one layer uses two rules:
+    </p>
+    $$
+    \boldsymbol{\delta}^{(l)} = \left(W^{(l+1)}\right)^{\!\top} \boldsymbol{\delta}^{(l+1)} \odot \sigma'^{(l)}\!\left(\mathbf{z}^{(l)}\right),
+    \qquad l = L-1, \dots, 1.
+    $$
+    <p>
+      With $\boldsymbol{\delta}^{(l)}$ known, the parameter gradients are:
+    </p>
+    $$
+    \frac{\partial \mathcal{L}}{\partial W^{(l)}} = \boldsymbol{\delta}^{(l)} \bigl(\mathbf{h}^{(l-1)}\bigr)^{\!\top},
+    \qquad
+    \frac{\partial \mathcal{L}}{\partial \mathbf{b}^{(l)}} = \boldsymbol{\delta}^{(l)}.
+    $$
+    <p>
+      In the mini-batch form, these become outer products averaged over the
+      batch: $\partial \mathcal{L} / \partial W^{(l)} = \frac{1}{B} (\Delta^{(l)})^\top H^{(l-1)}$.
+    </p>
+
+    <h3>6.2 Why gradients vanish or explode</h3>
+    <p>
+      Unrolling the recurrence from layer $L$ to layer $1$:
+    </p>
+    $$
+    \boldsymbol{\delta}^{(1)} = \left( \prod_{l=2}^{L} \left(W^{(l)}\right)^{\!\top} \mathrm{diag}\bigl(\sigma'^{(l)}(\mathbf{z}^{(l)}))\bigr) \right) \boldsymbol{\delta}^{(L)}.
+    $$
+    <p>
+      The product is the key. If each factor has spectral norm $\rho$, the
+      product's norm grows or shrinks like $\rho^{L}$. Two failure modes:
+    </p>
+    <ul>
+      <li>
+        <b>Vanishing</b> if $\rho < 1$, e.g.&nbsp;deep sigmoid stacks
+        ($\sigma' \le \tfrac14$ makes $\rho$ small fast) or weights with small
+        entries.
+      </li>
+      <li>
+        <b>Exploding</b> if $\rho > 1$, typical with large initialization or
+        ReLU stacks with poorly-scaled weights. Symptom: NaN losses,
+        parameter values oscillating wildly.
+      </li>
+    </ul>
+    <p>
+      Mitigations used in this project:
+    </p>
+    <ul>
+      <li><b>LayerNorm / RMSNorm</b> — rescales activations to unit variance,
+          keeping $\|W\|$ and $\sigma'$ in a safe range.</li>
+      <li><b>Residual connections</b> — add an identity term so the product
+          never fully decays (see §10).</li>
+      <li><b>Normalized initialization</b> — the project uses
+          $\mathcal{U}(-0.5, 0.5)$, which is a heuristic that works well for
+          shallow nets but is not the principled Xavier/He scaling.</li>
+    </ul>
+
+    <h3>6.3 Gradient Clipping</h3>
+    <p>
+      When the product of Jacobians in §6.2 has a spectral norm &gt; 1, the
+      gradients can become astronomically large, causing the optimizer to take
+      a catastrophic step that completely destroys the learned weights (the
+      loss suddenly becomes <code>NaN</code>). To prevent this,
+      <b>gradient clipping</b> artificially restricts the size of the gradient
+      before the optimizer step.
+    </p>
+
+    <h4>Clip by Value</h4>
+    <p>
+      The simplest approach is to clamp each element of the gradient vector
+      independently to a fixed range $[-\alpha, \alpha]$:
+    </p>
+    $$
+    g_i \leftarrow \max\bigl(-\alpha, \min(g_i, \alpha)\bigr).
+    $$
+    <p>
+      <b>Pros:</b> Extremely cheap and easy to understand. <br>
+      <b>Cons:</b> It changes the <em>direction</em> of the gradient. If the
+      original gradient is $(100, 1)$, and $\alpha = 10$, the clipped gradient
+      becomes $(10, 1)$, shifting the update direction heavily towards the
+      second coordinate.
+    </p>
+
+    <h4>Clip by Global Norm</h4>
+    <p>
+      To preserve the gradient's direction, we can instead rescale the
+      <em>entire</em> gradient tensor (across all layers) if its global
+      $L_2$ norm exceeds a threshold $\tau$:
+    </p>
+    $$
+    \mathbf{g} \leftarrow \mathbf{g} \cdot \min\left(1, \frac{\tau}{\|\mathbf{g}\|_2 + \epsilon}\right),
+    $$
+    <p>
+      where $\|\mathbf{g}\|_2 = \sqrt{\sum_i g_i^2}$ is the global norm of all
+      parameters combined.
+    </p>
+    <p>
+      <b>Pros:</b> Preserves the descent direction. If the norm is too large,
+      it simply scales the whole vector down, acting like an automatic,
+      instantaneous reduction of the learning rate. This is the standard
+      choice for modern architectures (Transformers, large MoE models).
+    </p>
+    <div class="note">
+      <p><b>Is clipping a form of regularization?</b> No. Regularization (L1/L2)
+      penalizes large <em>weights</em> to improve generalization. Gradient
+      clipping restricts large <em>updates</em> to ensure training stability.
+      It doesn't make the model simpler; it just makes the optimizer more
+      robust.</p>
+    </div>
+
+    <!-- ───────────────────────────── 7 · OPTIMIZERS -->
+    <h2 id="t-opt">7 · Optimizers</h2>
+    <p>
+      All optimizers in the playground share the interface
+      <code>step(params, grads, active_mask, key)</code> and update the
+      parameters in-place. The differences are how they transform the raw
+      gradient before applying it.
+    </p>
+
+    <h3>7.1 SGD</h3>
+    $$
+    \theta_{t+1} = \theta_t - \eta \, g_t, \qquad g_t = \nabla_\theta \mathcal{L}(\theta_t).
+    $$
+    <p>
+      Simplest and most memory-efficient ($O(1)$ state). Requires a
+      well-tuned $\eta$; with a constant rate it can oscillate in a "ravine"
+      (curvature high in one direction, low in another).
+    </p>
+
+    <h3>7.2 Momentum</h3>
+    $$
+    v_{t+1} = \mu \, v_t + g_t, \qquad
+    \theta_{t+1} = \theta_t - \eta \, v_{t+1}.
+    $$
+    <p>
+      Accumulates gradient history so that consistent directions build up
+      speed, while oscillating directions cancel out. Effective learning rate
+      scales roughly as $\eta / (1 - \mu)$ along persistent directions, so
+      $\mu = 0.9$ gives a ~10× boost. Typical $\mu \in [0.9, 0.99]$.
+    </p>
+
+    <h3>7.3 RMSProp</h3>
+    $$
+    s_{t+1} = \rho \, s_t + (1 - \rho)\, g_t^2,
+    \qquad
+    \theta_{t+1} = \theta_t - \eta \frac{g_t}{\sqrt{s_{t+1}} + \epsilon}.
+    $$
+    <p>
+      Divides each gradient coordinate by the RMS of its history. This
+      effectively adapts the learning rate per-parameter: coordinates with
+      consistently small gradients get a larger effective rate. The constant
+      $\epsilon$ (typically $10^{-8}$) avoids division by zero.
+    </p>
+
+    <h3>7.4 Adam</h3>
+    $$
+    \begin{aligned}
+    m_t &= \beta_1 m_{t-1} + (1 - \beta_1)\, g_t, \\
+    v_t &= \beta_2 v_{t-1} + (1 - \beta_2)\, g_t^2, \\
+    \hat{m}_t &= \frac{m_t}{1 - \beta_1^t}, \quad
+    \hat{v}_t = \frac{v_t}{1 - \beta_2^t}, \\
+    \theta_{t+1} &= \theta_t - \eta \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}.
+    \end{aligned}
+    $$
+    <p>
+      Adam = Momentum + RMSProp with bias correction. The $\beta_1^t$,
+      $\beta_2^t$ corrections matter in the first few steps, when $m$ and $v$
+      are biased toward 0. Defaults $\beta_1 = 0.9, \beta_2 = 0.999$ work
+      across a wide range of problems (Kingma &amp; Ba 2014).
+    </p>
+
+    <h3>7.5 Practical notes</h3>
+    <table>
+      <tr><th>Optimizer</th><th>State per param</th><th>LR sensitivity</th><th>Best for</th></tr>
+      <tr><td>SGD</td>       <td>0</td><td>High</td>   <td>Shallow nets, well-conditioned problems</td></tr>
+      <tr><td>Momentum</td>  <td>1</td><td>Medium</td> <td>Smooth losses, avoids oscillation</td></tr>
+      <tr><td>RMSProp</td>   <td>1</td><td>Low</td>    <td>Non-stationary gradients</td></tr>
+      <tr><td>Adam</td>      <td>2 + step</td><td>Low</td><td>Default for deep/transformer-like nets</td></tr>
+    </table>
+
+
+    <!-- ───────────────────────────── 8 · REGULARIZATION -->
+    <h2 id="t-reg">8 · Regularization</h2>
+    <p>
+      Regularization discourages complex parameter configurations that fit
+      the training data too closely. Both L1 and L2 add a penalty to the
+      loss:
+    </p>
+    $$
+    \mathcal{L}_{\text{reg}}(\theta) = \mathcal{L}(\theta) + \lambda \, \Omega(\theta).
+    $$
+    <p>
+      The playground applies $\Omega$ only to weight matrices, not biases.
+      Biases do not contribute to high-frequency oscillations, so they are
+      typically left unpenalized.
+    </p>
+
+    <h3>8.1 L2 (weight decay)</h3>
+    $$
+    \Omega_{L_2}(W) = \tfrac12 \|W\|_2^2 = \tfrac12 \sum_{i,j} W_{ij}^2,
+    \qquad
+    \nabla_W \Omega_{L_2} = W.
+    $$
+    <p>
+      The gradient of the penalty is just $\lambda W$, so the update becomes
+      $(1 - \eta\lambda) W - \eta g$ — every weight is <em>shrunk</em>
+      multiplicatively toward 0 at each step. Under plain SGD this is
+      exactly equivalent to weight decay, but under Adam they diverge
+      (decoupled weight decay, a.k.a. AdamW, applies the shrink separately).
+    </p>
+
+    <h3>8.2 L1 (sparsity)</h3>
+    $$
+    \Omega_{L_1}(W) = \|W\|_1 = \sum_{i,j} |W_{ij}|,
+    \qquad
+    \partial_W \Omega_{L_1} = \mathrm{sign}(W).
+    $$
+    <p>
+      The subgradient of $|w|$ at $w = 0$ is the <em>interval</em> $[-1, 1]$.
+      This is what makes L1 special:
+    </p>
+    <ul>
+      <li>
+        For $w \neq 0$ the update is $w \leftarrow w - \eta\lambda\,\mathrm{sign}(w) - \eta g$
+        — a constant push toward $0$, independent of $|w|$. Small weights get
+        erased entirely.
+      </li>
+      <li>
+        At $w = 0$ any subgradient $\xi \in [-1, 1]$ is valid; if the data
+        gradient satisfies $|g| \le \lambda$, we can choose $\xi = -g/\lambda$
+        so that $\lambda \xi + g = 0$ and the parameter <em>stays</em> at $0$.
+        Once a weight hits 0, it sticks.
+      </li>
+    </ul>
+    <p>
+      So L1 simultaneously prunes and shrinks. The playground goes one step
+      further: when an update crosses zero, it snaps the weight to exactly
+      $0$ and marks it <b>dead</b> — frozen forever. This is
+      <em>hard-thresholding</em>, not the more common soft-thresholding, and
+      makes sparsity permanent (see <code>updater.py</code>).
+    </p>
+
+    <div class="warn">
+      <p><b>Heads-up.</b> Because dead weights are never updated again, the
+      network's effective capacity strictly decreases over training. A high
+      L1 rate can kill most of the network in a few epochs. This is why L1
+      is best used with a small learning rate and a small
+      <code>regularizationRate</code>.</p>
+    </div>
+
+
+    <!-- ───────────────────────────── 9 · NORMALIZATION -->
+    <h2 id="t-norm">9 · Normalization</h2>
+    <p>
+      Normalization re-scales each example's pre-activation vector to have
+      controlled mean and variance, then re-learns the original scale via
+      per-feature gains $\boldsymbol{\gamma}$ and shifts $\boldsymbol{\beta}$.
+    </p>
+
+    <h3>9.1 LayerNorm (Ba, Kiros &amp; Hinton 2016)</h3>
+    $$
+    \begin{aligned}
+    \mu_j^{(l)} &= \frac{1}{d_l}\sum_{k=1}^{d_l} z_k^{(l)}, &
+    \sigma^2_j &= \frac{1}{d_l}\sum_{k=1}^{d_l} \bigl(z_k^{(l)} - \mu_j^{(l)}\bigr)^2, \\
+    \hat{z}_k &= \frac{z_k - \mu}{\sqrt{\sigma^2 + \epsilon}}, &
+    y_k &= \gamma_k \hat{z}_k + \beta_k.
+    \end{aligned}
+    $$
+    <p>
+      Normalizes across the <em>feature</em> dimension (not across the batch
+      like BatchNorm). This makes it independent of batch size — it works
+      even with batch size 1 — and it does not need running statistics at
+      inference. The learnable $\boldsymbol{\gamma}, \boldsymbol{\beta}$
+      restore the ability to represent any per-feature scale and shift; if
+      the network "needs" unnormalized activations, it can set $\gamma = \sigma$
+      and $\beta = \mu$.
+    </p>
+
+    <h3>9.2 RMSNorm (Zhang &amp; Sennrich 2019)</h3>
+    $$
+    \hat{z}_k = \frac{z_k}{\sqrt{\tfrac{1}{d_l}\sum_j z_j^2 + \epsilon}}, \qquad
+    y_k = \gamma_k \hat{z}_k.
+    $$
+    <p>
+      Drops the mean subtraction and the shift $\beta$. Empirical observation:
+      most of LayerNorm's benefit comes from the RMS rescaling, not the
+      centering. RMSNorm is faster (no mean, no bias) and often as good.
+    </p>
+
+    <h3>9.3 Pre-norm vs Post-norm</h3>
+    <p>
+      The playground lets you place the normalization before or after the
+      affine transform:
+    </p>
+    $$
+    \textbf{Pre-norm: }  \mathbf{z} = W \cdot \mathrm{Norm}(\mathbf{h}) + b
+    \qquad
+    \textbf{Post-norm: } \mathbf{z} = \mathrm{Norm}(W\mathbf{h} + b)
+    $$
+    <ul>
+      <li>
+        <b>Post-norm</b> (the original transformer, Vaswani et al. 2017)
+        normalizes the layer's output, so the <em>residual branch</em> carries
+        the unnormalized signal. This makes the residual stream grow with
+        depth and requires careful warm-up to train deep stacks.
+      </li>
+      <li>
+        <b>Pre-norm</b> normalizes the input to the affine map, so the
+        residual stream stays normalized. It is markedly more stable for
+        deep networks, and is the default in modern large models. The
+        downside: the last layer's output is unnormalized, so one sometimes
+        adds a final normalization at the very end.
+      </li>
+    </ul>
+
+
+    <!-- ───────────────────────────── 10 · RESIDUAL -->
+    <h2 id="t-res">10 · Residual Connections</h2>
+    <p>
+      A residual (skip) connection adds the layer's input to its output:
+    </p>
+    $$
+    \mathbf{h}^{(l)} = \mathcal{F}^{(l)}\!\left(\mathbf{h}^{(l-1)}\right) + \mathbf{h}^{(l-1)},
+    $$
+    <p>
+      where $\mathcal{F}^{(l)}$ is the "residual branch" (affine + activation).
+      The playground implements this as <code>skip_links[l]</code>, added
+      <em>after</em> activation.
+    </p>
+
+    <h3>10.1 The gradient identity term</h3>
+    <p>
+      Unrolling from layer $L$ to layer $l$:
+    </p>
+    $$
+    \mathbf{h}^{(L)} = \mathbf{h}^{(l-1)} + \sum_{k=l}^{L} \mathcal{F}^{(k)}\!\left(\mathbf{h}^{(k-1)}\right).
+    $$
+    <p>
+      Differentiating:
+    </p>
+    $$
+    \frac{\partial \mathbf{h}^{(L)}}{\partial \mathbf{h}^{(l-1)}} =
+    I + \frac{\partial}{\partial \mathbf{h}^{(l-1)}} \sum_{k=l}^{L} \mathcal{F}^{(k)}\!\left(\mathbf{h}^{(k-1)}\right).
+    $$
+    <p>
+      The identity term survives <em>no matter how deep</em> the network is.
+      Even if every $\partial \mathcal{F}^{(k)} / \partial \mathbf{h}$ is
+      small, the gradient still has a direct path to the input. This is the
+      mathematical reason residuals solve vanishing gradients.
+    </p>
+
+    <h3>10.2 Why it composes with normalization</h3>
+    <p>
+      Pre-norm + residual gives the "residual stream" architecture: an
+      unnormalized highway $\mathbf{h}$ to which normalized, rescaled
+      contributions are added at each layer. Gradients propagate cleanly
+      through the highway; each block's internal gradient is amplified by
+      LayerNorm. This is the fundamental reason transformers can be 100+
+      layers deep.
+    </p>
+
+
+    <!-- ───────────────────────────── 11 · MoE -->
+    <h2 id="t-moe">11 · Mixture of Experts</h2>
+    <p>
+      An MoE layer replaces a single dense block with $E$ parallel experts
+      plus a small <b>router</b> that selects which experts to use for each
+      input. Total parameters grow as $E \cdot |\text{expert}|$, but compute
+      grows only as $k \cdot |\text{expert}|$ where $k$ is the number of
+      selected experts (typically $k \ll E$). This is the basic capacity-vs-compute
+      tradeoff behind MoE LLMs.
+    </p>
+
+    <h3>11.1 Routing</h3>
+    $$
+    \begin{aligned}
+    \mathbf{s} &= W_r \mathbf{h} + \mathbf{b}_r \in \mathbb{R}^E
+    &&\text{(router logits)} \\
+    \mathbf{g} &= \operatorname{softmax}(\mathbf{s} / \tau)
+    &&\text{(gating probabilities, }\tau = \text{temperature)} \\
+    \mathbf{m} &= \operatorname{TopK}_k(\mathbf{g})
+    &&\text{(binary mask; } m_e = \mathbb{1}[e \in \text{top-}k]) \\
+    \tilde{g}_e &= \frac{m_e \, g_e}{\sum_{e'} m_{e'} g_{e'}}
+    &&\text{(normalized gate)}
+    \end{aligned}
+    $$
+    <p>
+      The layer's output is a weighted combination of the selected experts:
+    </p>
+    $$
+    \mathbf{h}' = \sum_{e=1}^{E} \tilde{g}_e \, E_e(\mathbf{h}).
+    $$
+    <p>
+      The playground also supports a <b>soft</b> routing variant in which
+      $\mathbf{m} = \mathbf{1}$ and $\tilde{g} = \mathbf{g}$: every expert is
+      run and combined. That is exact but computes $E$ experts per token
+      instead of $k$, erasing the compute savings.
+    </p>
+
+    <h3>11.2 Load balancing</h3>
+    <p>
+      A pure router has a perverse incentive: it can
+      send every input to the same expert and still minimise the loss. That
+      expert becomes a generalist, the others get no gradient, and the
+      layer collapses to a dense block. Switch Transformer (Fedus et al. 2021)
+      counters this with an auxiliary loss:
+    </p>
+    $$
+    f_e = \frac{1}{B}\sum_{i=1}^{B} m_{e,i},
+    \qquad
+    P_e = \frac{1}{B}\sum_{i=1}^{B} g_{e,i},
+    \qquad
+    \mathcal{L}_{\text{aux}} = \alpha \, E \sum_{e=1}^{E} f_e \, P_e.
+    $$
+    <p>
+      $f_e$ is the fraction of tokens routed to expert $e$; $P_e$ is the
+      average gate probability. The product $f_e P_e$ is minimised when the
+      router is uniform — $f_e = P_e = 1/E$ — giving $\mathcal{L}_{\text{aux}} = \alpha$.
+      It is added to the main loss and backpropagates through $\mathbf{g}$
+      into the router weights.
+    </p>
+
+    <h3>11.3 The "k = 1 + normalize" trap</h3>
+    <p>
+      A common surprise: with top-1 routing, normalised gates, and no aux
+      loss, the router receives <b>zero gradient</b>. Here's why. If exactly
+      one expert $\hat{e}$ is selected, its normalised gate is
+    </p>
+    $$
+    \tilde{g}_{\hat{e}} = \frac{g_{\hat{e}}}{g_{\hat{e}}} = 1,
+    \qquad
+    \tilde{g}_{e \neq \hat{e}} = 0.
+    $$
+    <p>
+      The output $\mathbf{h}' = E_{\hat{e}}(\mathbf{h})$ does not depend on
+      $\mathbf{s}$ except through the <em>discrete</em> choice of $\hat{e}$.
+      The map $\mathbf{s} \mapsto \tilde{g}$ is piecewise constant, so its
+      Jacobian is zero almost everywhere. Router weights get no signal from
+      the main loss, and the routing is frozen at initialization.
+    </p>
+    <p>
+      The two ways out:
+    </p>
+    <ul>
+      <li><b>$k \ge 2$.</b> Two experts must share the probability mass, so
+          $\tilde{g}$ varies continuously with $\mathbf{s}$ and the Jacobian
+          is nonzero. This is why the playground clamps <code>top_k ≥ 2</code>.</li>
+      <li><b>Aux loss.</b> Even when the main-loss gradient is zero, the aux
+          loss $f_e P_e$ still depends on $\mathbf{g}$ smoothly (it is
+          $\propto \sum f_e g_e$ when $f_e$ is treated as a constant w.r.t.&nbsp;$\mathbf{s}$,
+          which is the standard straight-through approximation). So the
+          router can still learn to balance load.</li>
+    </ul>
+
+    <h3>11.4 Jacobian of the normalized gate</h3>
+    <p>
+      For completeness, the gradient of $\tilde{g}$ w.r.t.&nbsp;the logits,
+      used inside <code>Network._backward_moe</code>:
+    </p>
+    $$
+    \frac{\partial \tilde{g}_e}{\partial s_j} = \frac{1}{\tau}\, \tilde{g}_e \left( \delta_{ej} - \tilde{g}_j \right) m_j,
+    $$
+    <p>
+      where $\delta_{ej}$ is the Kronecker delta. This is exactly the softmax
+      Jacobian, restricted to the top-$k$ support. When $k = 1$ the support
+      is a single index, so the Jacobian is zero everywhere.</p>
+
+
+    <!-- ───────────────────────────── 12 · GENERALIZATION -->
+    <h2 id="t-gen">12 · Generalization &amp; Training Dynamics</h2>
+
+    <h3>12.1 Bias–variance tradeoff</h3>
+    <p>
+      For squared loss, the expected test error of a fitted model $\hat{f}$
+      at a point $\mathbf{x}$ decomposes as
+    </p>
+    $$
+    \mathbb{E}\bigl[(y - \hat{f}(\mathbf{x}))^2\bigr] =
+    \underbrace{\bigl(\mathbb{E}[\hat{f}(\mathbf{x})] - f^*(\mathbf{x})\bigr)^2}_{\text{bias}^2}
+    + \underbrace{\mathrm{Var}[\hat{f}(\mathbf{x})]}_{\text{variance}}
+    + \underbrace{\sigma_\epsilon^2}_{\text{irreducible noise}}.
+    $$
+    <p>
+      Wider/deeper networks reduce bias but increase variance. Regularization
+      (weight decay, L1) and early stopping reduce variance at the cost of a
+      little bias. The playground's <em>training vs test loss</em> panels make
+      this tradeoff directly visible.
+    </p>
+
+    <h3>12.2 Reading the loss curve</h3>
+    <ul>
+      <li><b>Both decreasing</b> — underfitting, keep training or increase
+          capacity.</li>
+      <li><b>Train ↓, test ↑</b> — overfitting; add regularization, reduce
+          capacity, or increase data.</li>
+      <li><b>Both plateauing high</b> — under-capacity, wrong activation,
+          or too few features.</li>
+      <li><b>Oscillating</b> — learning rate too high, or batch too small.</li>
+    </ul>
+
+    <h3>12.3 The effects of data distribution</h3>
+    <p>
+      Network capacity is only half the story. Data geometry matters just as
+      much:
+    </p>
+    <ul>
+      <li><b>Linearly separable</b> problems (linear, diagonal) need zero
+          hidden layers; any hidden unit is wasted.</li>
+      <li><b>Low-dimensional manifolds</b> (circle, rings) need at least
+          one hidden layer to create the "annulus" region.</li>
+      <li><b>Highly oscillatory</b> targets (spiral, mandala, hf-checkerboard)
+          require either depth (for hierarchical feature composition) or
+          high-frequency activations (sine), or both.</li>
+      <li><b>Noise</b> in the data labels acts as implicit regularization;
+          moderate noise can improve generalization (see the playground's
+          <code>noise</code> slider).</li>
+      <li><b>Feature augmentation</b> ($X_1 X_2$, $X_1^2$, $X_2^2$) gives the
+          network hand-engineered coordinates. This is the "shallowest"
+          possible inductive bias and can solve some problems (xor, circle)
+          with a single neuron.</li>
+    </ul>
+    <p>
+      Together these mean a network is <em>not</em> a universal problem
+      solver — the same architecture can succeed spectacularly on one
+      dataset and fail completely on another with the same number of
+      classes and the same label noise. The playground's datasets are
+      designed to make this variation directly observable.
+    </p>
+
+  </div>
+</article>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     TAB 2 · USING THE PLAYGROUND
+     ════════════════════════════════════════════════════════════════════ -->
+<article id="tab-usage" class="tab-panel l--page tutorial-main math-pending">
+
+  <nav class="toc">
+    <h5>Contents</h5>
+    <ol>
+      <li><a href="#u-quick">1 · Quick Start</a></li>
+      <li><a href="#u-ui">2 · The Interface</a></li>
+      <li>
+        <a href="#u-data">3 · Datasets</a>
+        <div class="sub">
+          <a href="#u-data-tax">3.1 Taxonomy</a>
+          <a href="#u-data-ladder">3.2 Difficulty ladder</a>
+          <a href="#u-data-real">3.3 Real-world</a>
+        </div>
+      </li>
+      <li><a href="#u-feat">4 · Features</a></li>
+      <li><a href="#u-arch">5 · Architecture</a></li>
+      <li><a href="#u-act">6 · Activations in Practice</a></li>
+      <li><a href="#u-norm">7 · Normalization</a></li>
+      <li><a href="#u-res">8 · Residual Connections</a></li>
+      <li><a href="#u-moe">9 · MoE in Practice</a></li>
+      <li><a href="#u-train">10 · Training Parameters</a></li>
+      <li><a href="#u-reg">11 · Regularization</a></li>
+      <li><a href="#u-viz">12 · Reading the Visualizations</a></li>
+      <li>
+        <a href="#u-export">13 · Save, Export &amp; Share</a>
+        <div class="sub">
+          <a href="#u-save">13.1 Save &amp; import</a>
+          <a href="#u-share">13.2 Share via URL</a>
+          <a href="#u-python">13.3 Python code</a>
+          <a href="#u-custom">13.4 Custom data</a>
+        </div>
+      </li>
+      <li><a href="#u-faq">14 · Common Pitfalls</a></li>
+    </ol>
+  </nav>
+
+  <div class="content">
+
+    <h2 id="u-quick">1 · Quick Start</h2>
+    <ol>
+      <li>Open the playground. The defaults are: <code>circle</code> dataset,
+          400 points, one hidden layer of 4 sigmoid units, SGD with learning
+          rate 0.03.</li>
+      <li>Click the green <b>Play</b> button (or step manually).
+          The <b>Training loss</b> should drop within ~20 epochs; the decision
+          boundary in the output panel should progressively circle the inner
+          class.</li>
+      <li>Click any <b>hidden neuron</b> node. A zoom window shows that
+          neuron's decision boundary. This is the single most useful
+          debugging tool in the playground.</li>
+      <li>If the network plateaus, try:
+          <ul>
+            <li>Bigger learning rate (<code>0.1</code>) for faster initial progress.</li>
+            <li>More neurons or a second layer.</li>
+            <li>ReLU instead of sigmoid (faster convergence, sharper boundaries).</li>
+            <li>Turning on <code>X₁²</code>, <code>X₂²</code> features — this solves
+                <code>circle</code> in one layer with just two features.</li>
+          </ul>
+      </li>
+    </ol>
+
+
+    <h2 id="u-ui">2 · The Interface</h2>
+    <p>
+      The screen has three zones:
+    </p>
+    <ul>
+      <li><b>Top bar</b> — the timeline (Play/Pause/Step/Reset), the epoch
+          counter, and the main hyperparameters (learning rate, regularization,
+          problem type, optimizer). In the top-right corner of the page you will
+          also find <b>Tutorial</b>, <b>Save</b> and <b>Import</b> buttons;
+          see §13.</li>
+      <li><b>Left drawer</b> — network configuration: activations, per-layer
+          width, normalization, residual connections, MoE blocks.</li>
+      <li><b>Right drawer</b> — data: dataset selection, sample count,
+          train/test split, noise, batch size, online-data toggle, custom
+          upload.</li>
+      <li><b>Main canvas</b> — the network diagram (center), the output
+          heatmap (right), the loss chart, and the current Python
+          equivalent (below).</li>
+    </ul>
+    <p>
+      The left drawer's <em>per-layer config</em> is where most of the
+      advanced structure lives. Each layer is a card showing its width, its
+      activation, its normalization, and (for MoE blocks) its router settings.
+      Cards can be deleted; new layers are added with the <b>+ Hidden Layer</b>
+      or <b>+ MoE Block</b> buttons.
+    </p>
+
+
+    <h2 id="u-data">3 · Datasets</h2>
+
+    <h3 id="u-data-tax">3.1 Taxonomy</h3>
+    <p>
+      Datasets are grouped by <em>problem type</em>, not by name. This matters
+      because the output activation, loss, and metric differ across categories:
+    </p>
+    <table>
+      <tr>
+        <th>Category</th><th>Output</th><th>Loss</th><th>Label range</th>
+      </tr>
+      <tr><td>Classification (binary)</td><td>tanh → (−1, 1)</td><td>Squared error</td><td>{−1, +1}</td></tr>
+      <tr><td>Multiclass</td><td>softmax → simplex</td><td>Cross-entropy</td><td>{0, …, K−1}</td></tr>
+      <tr><td>Regression</td><td>linear</td><td>Squared error</td><td>continuous</td></tr>
+    </table>
+
+    <h3 id="u-data-ladder">3.2 Difficulty ladder</h3>
+    <p>
+      The datasets are best read as a ladder, from "one neuron is enough" to
+      "you need depth and a good activation". Use them to isolate specific
+      concepts:
+    </p>
+    <table>
+      <tr><th>Dataset</th><th>Geometry</th><th>What it tests</th></tr>
+      <tr><td><code>linear</code></td><td>Half-plane</td>
+          <td>Trivial; verifies the base case. A single neuron with linear or tanh suffices.</td></tr>
+      <tr><td><code>diagonal</code></td><td>Rotated half-plane</td>
+          <td>Learns the rotation — a good sanity check for input feature scaling.</td></tr>
+      <tr><td><code>gauss</code></td><td>Two Gaussian blobs</td>
+          <td>Noise robustness; sigmoid or tanh works, but with small LR.</td></tr>
+      <tr><td><code>xor</code></td><td>Quadrant pattern</td>
+          <td>Requires at least one hidden layer (non-linearly separable).</td></tr>
+      <tr><td><code>circle</code></td><td>Annulus</td>
+          <td>Non-convex; a single layer works but struggles; using
+              <code>X² + Y²</code> features reduces it to linear.</td></tr>
+      <tr><td><code>moons</code></td><td>Two crescents</td>
+          <td>Classic test for depth (2+ layers).</td></tr>
+      <tr><td><code>spiral</code></td><td>Two intertwined arms</td>
+          <td>Requires depth (3+) or sine activation; the sharp gradient
+              in the arms stresses the optimizer.</td></tr>
+      <tr><td><code>checkerboard</code></td><td>Grid parity</td>
+          <td>High-frequency; depth helps because it composes simple
+              boundaries into a fine grid.</td></tr>
+      <tr><td><code>rings</code></td><td>Concentric annuli</td>
+          <td>Similar to circle but with more classes.</td></tr>
+      <tr><td><code>sine-clf</code></td><td>Sine wave boundary</td>
+          <td>Tests periodic feature learning — sine activation is a
+              natural fit.</td></tr>
+      <tr><td><code>rose</code></td><td>Multi-petal flower</td>
+          <td>Angular and radial symmetry — check whether the network
+              can learn it from raw (x, y) or needs the polar features.</td></tr>
+      <tr><td><code>parabola</code></td><td>Parabolic boundary</td>
+          <td>Quadratic — needs one layer or the <code>X²</code> feature.</td></tr>
+      <tr><td><code>mandala</code></td><td>High-frequency angular modulation</td>
+          <td>Hell-tier binary. Tests the limits of depth and of
+              activation smoothness.</td></tr>
+      <tr><td><code>dense-spiral</code></td><td>3.5-turn spiral</td>
+          <td>Extreme; even 4+ layers barely succeed, and need online data
+              to avoid overfitting to the fixed sample.</td></tr>
+      <tr><td><code>hf-checkerboard</code></td><td>1.2-unit grid</td>
+          <td>Very high frequency; asks whether the network can represent
+              oscillations finer than its input scale.</td></tr>
+      <tr><td><code>star</code></td><td>5-pointed star</td>
+          <td>Sharp concavities — tests non-monotone activations (swish,
+              gelu) vs monotone ones.</td></tr>
+    </table>
+    <p>
+      Multiclass datasets (<code>multi-*</code>) follow the same logic, with
+      K = 3 to 10. The "hard" ones are: <code>multi-mandala-10</code>,
+      <code>multi-dense-spiral-10</code>, and <code>multi-hf-checkerboard-10</code>.
+      These are essentially impossible without depth ≥ 4 and careful
+      hyperparameter tuning, which is the point.
+    </p>
+
+    <h3 id="u-data-real">3.3 Real-world</h3>
+    <p>
+      The <code>rocks</code>, <code>poroperm</code>, <code>reg-porosity</code>,
+      and <code>reg-dts</code> datasets come from geoscience data
+      (sand-shale classification, porosity-permeability, porosity regression,
+      sonic log regression). They are non-probabilistic (fixed data, no
+      online regeneration) and their train/test split is guaranteed disjoint
+      — unlike the original TensorFlow Playground, where several real
+      datasets had overlapping splits.
+    </p>
+    <p>
+      The point of these is to contrast with synthetic data: the geometry is
+      messier, the class boundary is less clean, and the test loss
+      <em>does</em> behave like the true generalization error.
+    </p>
+
+
+    <h2 id="u-feat">4 · Features</h2>
+    <p>
+      Five input features can be toggled on or off:
+    </p>
+    <ul>
+      <li><code>X₁</code>, <code>X₂</code> — raw coordinates.</li>
+      <li><code>X₁X₂</code> — product; helpful for XOR-like and rotation-symmetric
+          patterns.</li>
+      <li><code>X₁²</code>, <code>X₂²</code> — squared; helpful for radial
+          datasets (circle, rings, mandala).</li>
+    </ul>
+    <p>
+      Toggling a feature <em>changes the input dimension</em> of the network,
+      so all weights are reinitialized. This is feature engineering: it lets
+      you test whether a problem is fundamentally nonlinear or just
+      "linear in a clever basis". If adding <code>X₁², X₂²</code> to a
+      circle problem drops the required depth from 2 to 1, that's a signal
+      that the geometry is genuinely radial and the raw coordinates were the
+      wrong basis.
+    </p>
+
+
+    <h2 id="u-arch">5 · Architecture</h2>
+    <p>
+      Each <em>hidden layer</em> is one of two kinds:
+    </p>
+    <ul>
+      <li><b>Dense</b> — $d$ neurons, one activation, optional bias,
+          optional LayerNorm or RMSNorm (pre or post).</li>
+      <li><b>MoE</b> — see §9. Contains multiple experts, each of which is
+          itself a small dense stack.</li>
+    </ul>
+    <p>
+      Maximum widths and depths (enforced by the server):
+    </p>
+    <table>
+      <tr><th>Quantity</th><th>Max</th><th>Why</th></tr>
+      <tr><td>Number of hidden layers</td><td>12</td><td>UI space</td></tr>
+      <tr><td>Neurons per dense layer</td><td>32</td><td>UI space</td></tr>
+      <tr><td>Experts per MoE block</td><td>16</td><td>Routing cost</td></tr>
+      <tr><td>Hidden layers per expert</td><td>8</td><td>UI space</td></tr>
+    </table>
+    <p>
+      The output layer is always a single dense layer with size determined by
+      the problem (1 for binary and regression, K for multiclass) and no
+      nonlinearity except softmax for multiclass. It has no normalization
+      and cannot be deleted.
+    </p>
+
+
+    <h2 id="u-act">6 · Activations in Practice</h2>
+    <p>
+      The mathematically complete table is in the Theory tab (§4); here is
+      the practical cheat-sheet:
+    </p>
+    <table>
+      <tr><th>Situation</th><th>Try</th><th>Why</th></tr>
+      <tr><td>Default / quick test</td><td><code>relu</code></td>
+          <td>Cheap, doesn't saturate on the positive side.</td></tr>
+      <tr><td>Regression, output must be bounded</td><td><code>tanh</code></td>
+          <td>Output is in (−1, 1), matches the label range.</td></tr>
+      <tr><td>Deep network, stability worry</td><td><code>selu</code></td>
+          <td>Self-normalizing; keeps activations mean-0 variance-1.</td></tr>
+      <tr><td>High-frequency targets</td><td><code>sine</code>, <code>gelu</code></td>
+          <td>Sine has an implicit frequency bias.</td></tr>
+      <tr><td>Fractal / star boundaries</td><td><code>swish</code>, <code>gelu</code>, <code>mish</code></td>
+          <td>Non-monotone activations can fold the space more efficiently.</td></tr>
+      <tr><td>Problem is "obviously linear"</td><td><code>linear</code></td>
+          <td>Reduce to a single affine map — a baseline.</td></tr>
+      <tr><td>Units dying (ReLU)</td><td><code>leakyrelu</code>, <code>elu</code></td>
+          <td>Nonzero gradient on the negative side.</td></tr>
+    </table>
+    <div class="warn">
+      <p><b>Do not mix a tiny LR with sigmoid.</b> Sigmoid's max gradient
+      is $0.25$; with 3+ layers the effective gradient can be $&lt; 10^{-3}$
+      and the network will look frozen even though it is technically
+      training. If you want sigmoid, either use a higher LR (0.1–0.3) or
+      use tanh, which has the same shape but a larger gradient bound.</p>
+    </div>
+
+
+    <h2 id="u-norm">7 · Normalization</h2>
+    <ul>
+      <li><b>LayerNorm</b> — default for transformer-like stacks. Use when
+          the loss oscillates or NaNs on deep networks.</li>
+      <li><b>RMSNorm</b> — cheaper variant; identical effect in practice
+          when activations are already roughly zero-mean.</li>
+      <li><b>Position</b> — <code>pre</code> for deep residual stacks (default
+          in modern LLMs); <code>post</code> for shallow networks that mimic
+          the original transformer.</li>
+    </ul>
+    <div class="tip">
+      <p>LayerNorm/RMSNorm add two small tensors ($\gamma, \beta$) per
+      layer. On 4-neuron layers this is negligible; on 32-neuron layers
+      it's still tiny compared to the $32 \times 32$ weight matrix. There is
+      almost no reason not to use <code>pre</code>-norm once depth $\ge 3$.</p>
+    </div>
+
+
+    <h2 id="u-res">8 · Residual Connections</h2>
+    <ul>
+      <li>Enable <b>Residual connections</b> in the left drawer.</li>
+      <li>Click <b>+ Add Skip Connection</b>, choose source and destination.
+          Only pairs with matching width are allowed — the UI disables
+          incompatible options.</li>
+      <li>Click an existing dashed skip line in the network diagram to
+          delete it.</li>
+      <li>The residual is added <em>after</em> the destination layer's
+          activation (and after the MoE combination, if any).</li>
+    </ul>
+    <p>
+      Use it whenever depth $\ge 3$ and the loss plateaus near its
+      initialization. If the network is already training well, adding a
+      residual rarely hurts — but it does add the identity path, which
+      means the layer's output is $h + \mathcal{F}(h)$, so the network has
+      to learn $\mathcal{F} = 0$ to be a pure identity. With zero-init
+      weights that happens automatically; with random init it's a small
+      adjustment the optimizer picks up quickly.
+    </p>
+
+
+    <h2 id="u-moe">9 · MoE in Practice</h2>
+    <p>
+      Click <b>+ MoE Block</b>. A MoE layer replaces the dense block with
+      $E$ experts, each of which is a small dense stack, plus a router.
+    </p>
+
+    <h3>9.1 Reading the router diagram</h3>
+    <p>
+      After training, the network canvas shows a <b>Router</b> column. Each
+      node $R_i$ is a heat-map of "how strongly does the router send the
+      input at this location to expert $i$". Hover a node to see its
+      decision boundary; click to zoom. Purple = high gate, white = low gate.
+    </p>
+    <p>
+      If the routing map is <b>uniform</b> (all roughly equal), the router is
+      undecided. If <b>one expert dominates the whole plane</b>, the others
+      are receiving no gradient and are effectively dead. The
+      <code>aux_coef</code> slider controls the strength of the load-balancing
+      loss that fights this collapse.
+    </p>
+
+    <h3>9.2 Reading the expert selector</h3>
+    <p>
+      Underneath the router, a small <code>E1 / E2 / …</code> selector lets
+      you see <em>one expert at a time</em>. The choice doesn't affect
+      training — it only affects the visualization. Compare experts to see
+      whether they specialize (each handles one region) or are redundant
+      (all look the same — usually means the router is not discriminating).
+    </p>
+
+    <h3>9.3 The five knobs</h3>
+    <table>
+      <tr><th>Knob</th><th>Effect</th><th>When to change</th></tr>
+      <tr><td><b>Type</b> (Top-k / Soft)</td>
+          <td>Top-k = sparse, cheap. Soft = dense, expensive but exact.</td>
+          <td>Top-k for "real" MoE; soft to verify that top-k is not
+              accidentally killing the router gradient.</td></tr>
+      <tr><td><b>Experts</b></td>
+          <td>Total capacity.</td>
+          <td>Increase if experts are all specialized and loss is still
+              dropping; decrease if many experts are dead.</td></tr>
+      <tr><td><b>Top-k</b></td>
+          <td>Compute per token. Must be ≥ 2 in this playground.</td>
+          <td>k=2 is the minimum for router gradients; k=E is equivalent
+              to soft.</td></tr>
+      <tr><td><b>Temp</b></td>
+          <td>τ in softmax(s/τ). Small τ → winner-takes-all; large τ → uniform.</td>
+          <td>Lower to encourage specialization, raise to encourage sharing.
+              If routing maps are all uniform, lower τ.</td></tr>
+      <tr><td><b>Aux</b></td>
+          <td>Weight of load-balancing loss.</td>
+          <td>Default 0.01 is fine for most cases. Raise to 0.05–0.1 if
+              one expert is dying. Above 0.1 the aux loss dominates and the
+              experts become more uniform than you want.</td></tr>
+      <tr><td><b>Router bias</b></td>
+          <td>Learnable per-expert bias on router logits.</td>
+          <td>On by default. Turn off to compare — usually worse.</td></tr>
+      <tr><td><b>Normalize</b></td>
+          <td>Rescale the top-k gates to sum to 1.</td>
+          <td>On by default. Turn off to see the unnormalized gates, which
+              can make the layer's output magnitude unreliable.</td></tr>
+      <tr><td><b>Expert depth</b></td>
+          <td>Each expert's own hidden-layer count (1–8).</td>
+          <td>Increase for hard problems — each expert can be as deep as
+              you want, at the cost of total parameters.</td></tr>
+    </table>
+
+    <h3>9.4 Debugging the router</h3>
+    <ul>
+      <li><b>All routing maps identical</b> — the router isn't learning. Check
+          that top-k ≥ 2 (k=1 + normalize gives zero router gradient) and
+          that <code>aux_coef</code> &gt; 0.</li>
+      <li><b>One expert dominates</b> — the aux loss isn't strong enough
+          (raise to 0.05) or the router temperature is too low (raise to 2.0).</li>
+      <li><b>Experts look redundant</b> — likely under-capacity. Increase
+          expert width, or lower τ to force specialization.</li>
+      <li><b>Loss jumps on adding MoE</b> — MoE replaces a dense block;
+          if the equivalent dense block was already excellent, the MoE
+          starts from scratch and needs a few epochs to match. Compare
+          losses at the same epoch count, not absolute counts.</li>
+    </ul>
+
+
+    <h2 id="u-train">10 · Training Parameters</h2>
+    <table>
+      <tr><th>Parameter</th><th>Effect</th><th>Rule of thumb</th></tr>
+      <tr><td><b>Learning rate</b></td>
+          <td>Step size.</td>
+          <td>0.03 for SGD, 0.003–0.01 for Adam/RMSProp. Too high =
+              loss diverges; too low = slow.</td></tr>
+      <tr><td><b>Batch size</b></td>
+          <td>Number of samples per gradient step.</td>
+          <td>10 is fine for 400 points. 1 = stochastic (noisy but fast);
+              128 = smooth but slower per epoch.</td></tr>
+      <tr><td><b>Train/test ratio</b></td>
+          <td>Fraction used for training.</td>
+          <td>50% is fine for symmetric problems; raise to 80% for hard
+              ones (dense-spiral) to see generalization error.</td></tr>
+      <tr><td><b>Noise</b></td>
+          <td>Label / input noise in generated data.</td>
+          <td>0 = clean; 10–20 = light noise; 30+ = effectively regularizing
+              the network by making overfitting impossible.</td></tr>
+      <tr><td><b>Data points</b></td>
+          <td>Total samples.</td>
+          <td>400 for synthetic. 100 for fast iteration; 2000 to see whether
+              the network can fit a large sample exactly.</td></tr>
+      <tr><td><b>Online data</b></td>
+          <td>Regenerate training set every epoch.</td>
+          <td>On if you want to test generalization without overfitting
+              to a fixed sample. Off if you want to see the exact same
+              input each epoch (better for reproducibility).</td></tr>
+      <tr><td><b>Grad Clip</b></td>
+          <td>Bounds the gradient magnitude before updating.</td>
+          <td>Norm 1.0–5.0 is standard. Use it if you see <code>NaN</code>
+              or oscillating losses.</td></tr>
+    </table>
+
+    <h3>10.1 Using Gradient Clipping</h3>
+    <p>
+      In the top control bar, the <b>Grad Clip</b> dropdown lets you choose
+      between <code>Value</code> and <code>Norm</code> clipping. By default it
+      is set to <code>None</code>.
+    </p>
+    <ul>
+      <li><b>Value</b>: Clamps each weight gradient independently. Use a small
+          value (e.g., <code>0.1</code> or <code>0.5</code>) if you have a
+          very shallow network that is acting erratically.</li>
+      <li><b>Norm</b>: Rescales the entire network's gradient if its global
+          norm exceeds the threshold. Use <code>1.0</code> or <code>5.0</code>.
+          This is the most robust setting and will rarely hurt a healthy
+          training run.</li>
+    </ul>
+    <p>
+      <b>When should you turn it on?</b>
+    </p>
+    <ul>
+      <li>You increased the learning rate to speed up training, but the loss
+          suddenly jumped to <code>NaN</code>.</li>
+      <li>You added a deep MoE block, and the router's probabilities are
+          oscillating wildly between experts.</li>
+      <li>You are using a deep network with <code>tanh</code> or <code>selu</code>
+          and the loss curve looks like a sawtooth wave.</li>
+    </ul>
+    <div class="tip">
+      <p>If clipping fixes your <code>NaN</code> issue but training is still
+      very slow, you have found the sweet spot: the network is stable, but
+      you can now safely increase the learning rate slightly to speed it up.</p>
+    </div>
+
+    <h2 id="u-reg">11 · Regularization</h2>
+    <table>
+      <tr><th>Mode</th><th>Effect on weights</th><th>When to use</th></tr>
+      <tr><td><code>none</code></td>
+          <td>No penalty.</td>
+          <td>Baseline; or when the network is clearly underfitting.</td></tr>
+      <tr><td><code>L2</code></td>
+          <td>Multiplicative shrink; weights approach 0 but rarely reach it.</td>
+          <td>When test loss is climbing while train loss drops (overfitting).</td></tr>
+      <tr><td><code>L1</code></td>
+          <td>Constant push toward 0; weights snap to exactly 0 and are frozen.</td>
+          <td>When you want sparsity — e.g. to see which input features
+              the network actually needs. <b>Warning:</b> dead weights are
+              permanent in this implementation.</td></tr>
+    </table>
+
+    <div class="warn">
+      <p><b>L1 in this playground is hard, not soft.</b> The updater snaps
+      a weight to 0 and permanently masks it once the update would cross 0.
+      This is visible as units going <em>grey</em> in the network diagram.
+      If you want to experiment with L1 but not lose capacity forever,
+      use a small rate (≤ 0.003) and reset if too many units die.</p>
+    </div>
+
+
+    <h2 id="u-viz">12 · Reading the Visualizations</h2>
+
+    <h3>12.1 The output heat-map</h3>
+    <p>
+      Each pixel is the network's output at that (x, y). For binary
+      classification the map is continuous in (−1, 1); for multiclass each
+      pixel is the argmax class; for regression it's the raw predicted value.
+    </p>
+    <p>
+      Points are training data (filled circles) and test data (hollow
+      circles, only visible when <b>Show test data</b> is checked). Mismatch
+      between the point colors and the underlying heat-map color indicates
+      misclassification.
+    </p>
+
+    <h3>12.2 Clicking a node</h3>
+    <p>
+      Clicking any hidden neuron opens a zoom window showing <em>that
+      neuron's</em> decision boundary — i.e. its output value across the input
+      space. This is how you diagnose:
+    </p>
+    <ul>
+      <li><b>Dead neurons</b> — the zoom is a single flat color.</li>
+      <li><b>Redundant neurons</b> — multiple neurons have near-identical
+          boundaries.</li>
+      <li><b>Specialization</b> — each neuron carves out a different region,
+          which is what you want.</li>
+    </ul>
+    <p>
+      Clicking a MoE router node works the same way but uses the router's
+      gating weight as the color value (purple heat-map), not the neuron's
+      activation.
+    </p>
+
+    <h3>12.3 The loss curve</h3>
+    <p>
+      The two lines are train loss (grey) and test loss (black). They should
+      trend together. Divergence means overfitting. Flat curves mean the
+      network is not learning (LR too low, or saturated).
+    </p>
+
+
+    <h2 id="u-export">13 · Save, Export &amp; Share</h2>
+    <p>
+      Everything in the playground — hyperparameters, layer structure, MoE
+      settings, features, dataset choice, residuals — is a single JSON-able
+      <em>state</em>. There are four ways to take that state with you:
+      <b>save it to a file</b>, <b>share it as a URL</b>, <b>export it as
+      runnable Python</b>, or <b>attach your own dataset</b>. Each lives in
+      a different button; the sections below cover them one by one.
+    </p>
+
+    <h3 id="u-save">13.1 Saving and loading configurations</h3>
+    <p>
+      In the top-right corner, the <b>Save</b> button downloads the current
+      state as a JSON file; the <b>Import</b> button opens a file picker and
+      applies a previously saved one. This is the recommended way to keep
+      experiments around — a saved file is portable across browsers, machines
+      and server restarts.
+    </p>
+
+    <h4>Saving</h4>
+    <p>
+      Clicking <b>Save</b> produces a file named
+      <code>nn-playground-&lt;timestamp&gt;.json</code> containing:
+    </p>
+    <pre><code>{
+      "app": "nn-playground",
+      "version": 1,
+      "savedAt": "2026-11-01T12:34:56.789Z",
+      "state": {
+        "learningRate": 0.03,
+        "batchSize": 10,
+        "problem": "classification",
+        "layerSpecs": [
+          {"type": "dense", "n": 4, "act": "sigmoid", "bias": true,
+           "norm": "none", "norm_pos": "post"}
+        ],
+        "residuals": [],
+        "dataset": "circle",
+        "x": true, "y": true, "xTimesY": false,
+        "xSquared": false, "ySquared": false,
+        ...
+      }
+    }</code></pre>
+    <p>
+      The <code>state</code> block is exactly the same object that gets
+      serialized into the URL hash (see §13.2), so the two formats are
+      interchangeable — you can hand-edit a saved file to change any
+      parameter and import it back.
+    </p>
+
+    <h4>Importing</h4>
+    <p>
+      Clicking <b>Import</b> opens a file picker; choose a
+      <code>.json</code> file of the form shown above. The server validates
+      and applies it as a single atomic operation
+      (<code>load_state</code> command). On success you get a green toast
+      <em>"Configuration loaded"</em> and the loss chart resets to epoch 0.
+    </p>
+    <p>
+      Import <b>replaces the entire state</b>, not just some fields. Anything
+      the file does not specify falls back to the playground defaults — so
+      importing a file saved from a 4-layer MoE network into a fresh session
+      will rebuild that MoE network from scratch, not layer-by-layer on top
+      of the current one.
+    </p>
+
+    <div class="note">
+      <p><b>Custom datasets.</b> If the saved file references a custom
+      dataset (uploaded in §13.4) that no longer exists on the server — for
+      example because the server restarted or the 1-hour TTL expired — the
+      import still succeeds, but the dataset field is silently reset to
+      <code>null</code> and the playground falls back to the default
+      dataset. When this happens you will see a red toast:
+      <em>"Custom dataset not found on server — reverted to default
+      dataset"</em>. Re-upload the dataset, then save a fresh file. </p>
+    </div>
+
+    <h4>What gets saved, what doesn't</h4>
+    <table>
+      <tr><th>Included</th><th>Not included</th></tr>
+      <tr>
+        <td>
+          All state fields (learning rate, optimizer, batch size, noise,
+          layer specs, MoE config, residuals, features toggled on, dataset /
+          reg dataset choice, gradient-clipping settings, discretize /
+          show-test toggles)
+        </td>
+        <td>
+          Trained weights, loss history, current epoch counter, uploaded
+          custom dataset contents, the exact random seed used to draw the
+          current training points
+        </td>
+      </tr>
+    </table>
+    <p>
+      In other words, a saved file captures the <em>recipe</em>, not the
+      <em>cake</em>. Re-importing restores the recipe and starts a fresh
+      training run — it does not resume an old one. If you want to compare
+      two architectures on the exact same initialization, use the
+      playground's <b>Reset</b> button (which keeps the seed) rather than
+      save/import.
+    </p>
+
+
+    <h3 id="u-share">13.2 Sharing via URL</h3>
+    <p>
+      The URL hash is continuously rewritten to match the state — every
+      slider drag, layer change, or dataset click immediately updates it via
+      <code>history.replaceState</code>. That means <b>the address bar is
+      always a full snapshot of the current configuration</b>. Copy it and
+      paste it elsewhere to share; the receiving browser applies the hash
+      before the first training step, so the loaded state exactly matches
+      what you shared.
+    </p>
+    <p>
+      The <b>Tutorial</b> link preserves this: opening the tutorial from a
+      configured playground carries the hash through, and <em>← Back to
+      Playground</em> returns you to the exact same configuration. Going
+      the other direction — landing on the tutorial cold, with no
+      hash — keeps the back-link pointed at the bare <code>/</code>, so
+      you land on the playground's defaults, which is what you would
+      expect if you never had a configuration to begin with.
+    </p>
+    <p>
+      URL hashes and saved files are mutually convertible: the
+      <code>state</code> field of a saved file <em>is</em> the set of
+      key-value pairs that appear in the hash, just with different
+      serialization. If you prefer editing files by hand rather than
+      tweaking sliders, save a file, edit it in any text editor, and import
+      it back.
+    </p>
+
+
+    <h3 id="u-python">13.3 The network as a Python function</h3>
+    <p>
+      The bottom of the page shows the current network as a <b>plain Python
+      function</b> (generated by <code>compile_network_to_py</code>). It has
+      no dependencies except <code>math</code>; copy-paste it into any
+      script:
+    </p>
+    <pre><code>import math
+
+    def forward(X1, X2):
+        prev = [X1, X2]
+        layers = [prev]
+        # Layer 1
+        z = [0.31 + 0.72 * prev[0] - 0.11 * prev[1], ...]
+        act_out = [math.tanh(v) for v in z]
+        prev = act_out
+        layers.append(prev)
+        # ...
+        return prev[0]</code></pre>
+    <p>
+      This is exactly the network the heat-map is showing. Useful for
+      understanding what "the model" actually is, and for using the trained
+      network in a downstream pipeline. It regenerates on every training
+      step, so after enough epochs the code you copy is a snapshot of the
+      weights you actually trained — not just the architecture.
+    </p>
+
+
+    <h3 id="u-custom">13.4 Custom data upload</h3>
+    <p>
+      Click the upload icon in the <b>DATA &amp; SETTINGS</b> drawer
+      (right side). The picker accepts <code>.json</code> files in one of
+      two equivalent shapes:
+    </p>
+    <pre><code>[{"x": 0.5, "y": -1.2, "label": 1},
+     {"x": -0.3, "y": 0.8, "label": -1}, ...]
+
+    {"points": [{"x": 0.5, "y": -1.2, "label": 1}, ...]}</code></pre>
+    <p>
+      Both are accepted; a bare array and an object with a <code>points</code>
+      key mean the same thing. Any additional keys (for example
+      <code>name</code>) are ignored.
+    </p>
+
+    <h4>Required fields</h4>
+    <p>
+      Every point must have three <em>numeric</em> fields:
+    </p>
+    <ul>
+      <li><code>x</code> — horizontal coordinate.</li>
+      <li><code>y</code> — vertical coordinate.</li>
+      <li><code>label</code> — class identifier or regression target.</li>
+    </ul>
+    <p>
+      All three must be finite (no <code>null</code>, no <code>NaN</code>,
+      no <code>Infinity</code>). At least 2 points are required, and there
+      must be at least 2 <em>distinct</em> labels — a single-class file is
+      rejected because it has no decision boundary to learn.
+    </p>
+
+    <div class="tip">
+      <p><b>Coordinate range.</b> The heat-map is drawn on
+      <code>[−6, 6]²</code>. Coordinates outside that square are accepted
+      by the server but will not appear in the picture, so points with
+      <code>x = 500</code> are essentially invisible. Scale your data into
+      roughly <code>[−6, 6]</code> on both axes before uploading.</p>
+    </div>
+
+    <h4>How the problem type is inferred</h4>
+    <p>
+      You do not choose <em>classification / multiclass / regression</em>
+      for custom data — the server infers it from the labels, and silently
+      updates the <b>Problem type</b> dropdown to match. The rules are:
+    </p>
+    <table>
+      <tr><th>Distinct labels</th><th>Label values</th><th>Inferred problem</th></tr>
+      <tr>
+        <td>exactly 2</td>
+        <td>any two distinct finite numbers (e.g. <code>−1/+1</code>,
+            <code>0/1</code>, <code>3.7/8.2</code>)</td>
+        <td><code>classification</code></td>
+      </tr>
+      <tr>
+        <td>3 to 12</td>
+        <td>all integers, <b>exactly</b> <code>0, 1, …, K−1</code>
+            (no gaps — <code>{0, 1, 3}</code> is <em>not</em> multiclass)</td>
+        <td><code>multiclass</code> with <code>K</code> classes</td>
+      </tr>
+      <tr>
+        <td>anything else</td>
+        <td>non-integer values, or integer values that don't start at 0 /
+            aren't contiguous, or K &gt; 12</td>
+        <td><code>regression</code></td>
+      </tr>
+    </table>
+    <p>
+      Some consequences worth knowing:
+    </p>
+    <ul>
+      <li>A 3-label file with labels <code>1, 2, 3</code> (not starting at
+          0) is treated as <b>regression</b>, not multiclass. Use
+          <code>0, 1, 2</code>.</li>
+      <li>A 5-label file with labels <code>0, 1, 2, 4, 5</code> (a gap at
+          3) is treated as <b>regression</b>. Fill the gap: relabel to
+          <code>0, 1, 2, 3, 4</code>.</li>
+      <li>More than 12 distinct integer labels is rejected with an
+          <em>too many classes</em> error — the playground caps multiclass
+          at 12.</li>
+      <li>Labels like <code>0.5, 1.5, 2.5</code> fall through to
+          <b>regression</b> (they are not integers, so no class inference
+          happens).</li>
+    </ul>
+
+    <h4>Hard limits</h4>
+    <table>
+      <tr><th>Limit</th><th>Value</th><th>Error message if exceeded</th></tr>
+      <tr><td>Total points</td><td>50 000</td>
+          <td><code>too many points (max 50000)</code></td></tr>
+      <tr><td>Classes (multiclass)</td><td>12</td>
+          <td><code>too many classes (max 12)</code></td></tr>
+      <tr><td>Distinct labels (binary)</td><td>2</td>
+          <td>(no error; more than 2 non-contiguous labels → regression)</td></tr>
+    </table>
+    <p>
+      When the server rejects an upload, the reason is shown as a red toast
+      in the playground (bottom center of the page). If you see nothing,
+      check the browser console — the front-end also validates the file
+      shape and reports errors there.
+    </p>
+
+    <h4>What happens after upload</h4>
+    <ol>
+      <li>The server assigns a temporary <code>datasetId</code> and returns
+          a 200-point preview.</li>
+      <li>A 60×60 thumbnail is rendered in the upload drawer, color-coded
+          by the inferred problem type.</li>
+      <li>The <b>Problem type</b> dropdown is updated automatically, and
+          the network is <em>reset</em> — all weights are re-initialized,
+          the loss chart clears, and the epoch counter returns to 0.</li>
+      <li>A seeded shuffle splits the points into train/test using the
+          current <b>Train:test ratio</b> slider (default 50%).</li>
+      <li>Training proceeds as with any synthetic dataset.</li>
+    </ol>
+
+    <h4>Which sliders still matter</h4>
+    <table>
+      <tr><th>Slider</th><th>Effect on custom datasets</th></tr>
+      <tr><td>Train:test ratio</td>
+          <td><b>Active</b> — controls the split fraction.</td></tr>
+      <tr><td>Batch size, learning rate, optimizer, regularization, grad clip</td>
+          <td><b>Active</b> — training operates as usual.</td></tr>
+      <tr><td>Noise</td>
+          <td><b>Ignored</b> — the points are fixed; noise is only applied
+              during <em>generation</em>, not to uploaded data.</td></tr>
+      <tr><td>Data points</td>
+          <td><b>Ignored</b> — the count is whatever you uploaded.</td></tr>
+      <tr><td>Online data</td>
+          <td><b>Ignored</b> — the training set is fixed, not regenerated
+              every epoch.</td></tr>
+      <tr><td>Dataset selector (left grid)</td>
+          <td>Clicking a synthetic dataset <b>detaches</b> the uploaded
+              data and reverts to the built-in one. The uploaded
+              <code>datasetId</code> is not lost — re-opening
+              <code>customDatasetId</code> in a saved file (§13.1) can
+              reattach it for the lifetime of the server process.</td></tr>
+    </table>
+
+    <div class="note">
+      <p><b>Lifetime.</b> Custom datasets live in the server's in-memory
+      session store and expire after 1 hour of inactivity, or immediately
+      on server restart. A <b>Save</b> taken while a custom dataset is
+      attached will carry the <code>customDatasetId</code>, but the id
+      only resolves on the same server process. If you import a saved
+      file after a restart, the id will be silently dropped and the
+      playground falls back to the default dataset — you will see a red
+      toast about it (see §13.1). Re-upload, then re-save.</p>
+    </div>
+
+
+    <h2 id="u-faq">14 · Common Pitfalls</h2>
+
+    <h3>14.1 "The loss is not decreasing"</h3>
+    <ul>
+      <li><b>Learning rate too low</b> for the activation (sigmoid in
+          particular). Raise to 0.1.</li>
+      <li><b>All units dead</b> — check by clicking a few. If every zoom
+          is a flat color, reset and switch to leakyrelu.</li>
+      <li><b>L1 killed the network</b> — grey nodes everywhere. Reset,
+          or set <code>regularization = none</code>.</li>
+      <li><b>Wrong problem type</b> — a regression dataset in classification
+          mode will mislabel every point.</li>
+    </ul>
+
+    <h3>14.2 "Train loss drops, test loss climbs"</h3>
+    <p>
+      Overfitting. The network is memorizing the training set. Solutions in
+      order of preference:
+    </p>
+    <ol>
+      <li><b>More data</b> — raise <code>numSamples</code> to 2000, or turn on
+          <code>Online data</code>.</li>
+      <li><b>Less capacity</b> — remove a layer, reduce neurons per layer.</li>
+      <li><b>L2 regularization</b> at a moderate rate (0.01–0.03).</li>
+      <li><b>Noise</b> at 10–20 — turns the task into a harder one that
+          cannot be memorized.</li>
+    </ol>
+
+    <h3>14.3 "The network's boundary is much simpler than the data"</h3>
+    <p>
+      Under-capacity. Add a layer, add neurons, or switch to a non-monotone
+      activation (swish, gelu, mish). For very structured problems (spiral,
+      mandala) you may also need the <code>X₁X₂</code> feature — the raw
+      coordinates simply don't contain the right geometric primitives.
+    </p>
+
+    <h3>14.4 "MoE doesn't help"</h3>
+    <p>
+      MoE is a capacity-expansion trick, not a magic accelerator. It helps
+      when:
+    </p>
+    <ul>
+      <li>The dataset naturally decomposes into sub-problems (e.g. modes,
+          clusters, multiple input regions).</li>
+      <li>The dense equivalent would need to be very wide to fit the same
+          function.</li>
+      <li>You have enough data for each expert to be trained (≥ 100 points
+          per expert).</li>
+    </ul>
+    <p>
+      It <em>does not</em> help when:
+    </p>
+    <ul>
+      <li>The problem is small (circle, xor) — a single dense layer with 8
+          neurons beats any MoE.</li>
+      <li>The router is frozen (top-k = 1 + normalize = zero router gradient
+          — see Theory §11.3).</li>
+      <li>The aux loss is too high — experts become identical, equivalent to
+          a dense layer with 1/E the width.</li>
+    </ul>
+
+    <h3>14.5 "Everything looks the same after reset"</h3>
+    <p>
+      Reset reuses the same seed (unless you click <b>Regenerate</b>). That
+      is intentional: it lets you <em>compare two different architectures
+      on the same initialization</em>. To get a different random draw, click
+      <b>Regenerate</b>.
+    </p>
+
+    <h3>14.6 "Custom dataset is gone after reloading the page"</h3>
+    <p>
+      Custom datasets live only in the server's in-memory session store and
+      expire after 1 hour. If the session is still alive, the dataset id
+      works; if the session has expired, the server silently drops the id
+      and falls back to the default dataset. This is by design — there is no
+      persistent user storage.
+    </p>
+    <h3>14.7 "Imported configuration doesn't look right"</h3>
+    <ul>
+      <li><b>Custom dataset dropped</b> — see §13.1. Re-upload it, then
+          import again, or save a new file after the upload.</li>
+      <li><b>Loss chart starts from epoch 0</b> — import always starts a
+          fresh training run. Saved weights are intentionally not part of
+          the file.</li>
+      <li><b>Some fields reverted to defaults</b> — import replaces the
+          whole state; anything the file did not contain is reset to the
+          playground's default rather than left as-is. Edit the file to
+          include the missing fields, or fix them with the UI afterward.</li>
+      <li><b>"too many classes"</b> — multiclass is capped at 12. Relabel
+          your data to contiguous integers <code>0..11</code>, or use
+          regression if labels are continuous.</li>
+      <li><b>Data uploaded as regression</b> — the label-inference rules in
+          §13.4 explain why. The most common cause is a gap in the integer
+          labels, or labels that don't start at 0.</li>
+    </ul>
+
+  </div>
+</article>
+
+<script>
+  // Preserve the playground URL hash across the tutorial round-trip.
+  (() => {
+    const backLink = document.getElementById("back-link");
+    if (backLink && location.hash.length > 1) {
+      backLink.href = "/" + location.hash;
+    }
+  })();
+  // Tab switching
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.toggle("active", b === btn);
+      });
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.id === "tab-" + target);
+      });
+      // Re-render any math in the newly shown panel (auto-render is idempotent)
+      if (window.renderMathInElement) {
+        const panel = document.getElementById("tab-" + target);
+        window.renderMathInElement(panel, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\[", right: "\\]", display: true},
+            {left: "$",  right: "$",  display: false},
+            {left: "\\(", right: "\\)", display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    });
+  });
+
+  // Auto-render math on load and unhide content
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.renderMathInElement) {
+      window.renderMathInElement(document.body, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "$",  right: "$",  display: false},
+          {left: "\\(", right: "\\)", display: false}
+        ],
+        throwOnError: false
+      });
+    }
+    document.body.classList.add("math-ready");
+  });
+</script>
+</body>
+</html>
